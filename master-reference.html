@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SonicWall MSP Knowledge Base – Master Reference</title>
+<meta charset="UTF-8">
+<meta name="description" content="Authoritative MSP internal standards for TZ and NSa SonicWall deployments.">
+</head>
+
+<body>
+
+<h1>SonicWall MSP Knowledge Base – Master Reference</h1>
+
+<p><strong>Purpose:</strong> This document defines authoritative security, deployment, and operational standards for managed SonicWall TZ and NSa firewall environments.</p>
+
+<hr>
+
+<h2>SECTION 1 – MSP GLOBAL SECURITY BASELINE (MANDATORY)</h2>
+
+<h3>1.1 Administrative Security</h3>
+<ul>
+<li>WAN management disabled unless explicitly required and IP restricted.</li>
+<li>Default admin account renamed or disabled.</li>
+<li>Strong password policy enforced.</li>
+<li>MFA required for all administrative access.</li>
+<li>Management access restricted to trusted IP ranges.</li>
+</ul>
+
+<h3>1.2 SSL VPN Mandatory Controls</h3>
+<ul>
+<li>MFA required for all SSL VPN users.</li>
+<li>TLS 1.2+ only. Legacy ciphers disabled.</li>
+<li>GeoIP restrictions enforced.</li>
+<li>Login attempt lockout configured.</li>
+<li>Botnet filter enabled.</li>
+<li>Brute-force detection alerts enabled.</li>
+</ul>
+
+<h3>1.3 Firmware Policy</h3>
+<ul>
+<li>Quarterly firmware review.</li>
+<li>Critical security patches deployed within 7 days.</li>
+<li>Firmware tested in lab before production deployment.</li>
+<li>Config backup taken before and after upgrade.</li>
+</ul>
+
+<h3>1.4 Logging &amp; Monitoring</h3>
+<ul>
+<li>Logs exported to centralized SIEM.</li>
+<li>Critical events trigger alerting.</li>
+<li>VPN login monitoring enabled.</li>
+<li>Configuration change alerts enabled.</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 2 – TZ SERIES DEPLOYMENT STANDARDS</h2>
+
+<h3>2.1 Performance Guardrails</h3>
+<ul>
+<li>Sustained CPU above 65% requires investigation.</li>
+<li>DPI-SSL enabled selectively based on performance impact.</li>
+<li>Heavy App Control policies used cautiously.</li>
+<li>Concurrent VPN user limits monitored.</li>
+</ul>
+
+<h3>2.2 Recommended Security Profile</h3>
+<ul>
+<li>IPS enabled.</li>
+<li>Gateway AV enabled.</li>
+<li>Anti-Spyware enabled.</li>
+<li>Botnet filter enabled.</li>
+<li>GeoIP filtering enforced.</li>
+</ul>
+
+<h3>2.3 Common TZ Risk Patterns</h3>
+<ul>
+<li>Any-Any firewall rules.</li>
+<li>DPI-SSL enabled without exclusions.</li>
+<li>WAN management exposed.</li>
+<li>Weak site-to-site VPN pre-shared keys.</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 3 – NSa SERIES DEPLOYMENT STANDARDS</h2>
+
+<h3>3.1 Advanced Security Posture</h3>
+<ul>
+<li>Full DPI-SSL recommended unless performance impact exceeds 20%.</li>
+<li>Segmentation strongly encouraged.</li>
+<li>Client certificate enforcement for VPN preferred.</li>
+<li>HA Active/Standby deployment recommended.</li>
+</ul>
+
+<h3>3.2 High Throughput Design</h3>
+<ul>
+<li>Monitor DPI memory utilization.</li>
+<li>Review connection count thresholds.</li>
+<li>Enable full security suite where hardware allows.</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 4 – MSP OPERATIONAL PLAYBOOKS</h2>
+
+<h3>4.1 New Client Onboarding</h3>
+<ol>
+<li>Baseline configuration applied.</li>
+<li>Security services enabled.</li>
+<li>SSL VPN hardened.</li>
+<li>Logs integrated with SIEM.</li>
+<li>Firmware updated to approved version.</li>
+</ol>
+
+<h3>4.2 Incident Response – Suspected Compromise</h3>
+<ol>
+<li>Disable affected VPN accounts.</li>
+<li>Review admin login logs.</li>
+<li>Export configuration for review.</li>
+<li>Validate firmware integrity.</li>
+<li>Rotate VPN shared secrets.</li>
+</ol>
+
+<h3>4.3 Annual Review Checklist</h3>
+<ul>
+<li>HA failover test completed.</li>
+<li>Firewall rule audit performed.</li>
+<li>VPN account audit performed.</li>
+<li>GeoIP restrictions reviewed.</li>
+<li>Security services license validated.</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 5 – MODEL COMPARISON SUMMARY</h2>
+
+<table border="1">
+<tr>
+<th>Capability</th>
+<th>TZ</th>
+<th>NSa</th>
+</tr>
+<tr>
+<td>DPI-SSL Scope</td>
+<td>Selective</td>
+<td>Full Recommended</td>
+</tr>
+<tr>
+<td>Ideal VPN Scale</td>
+<td>Low–Medium</td>
+<td>Medium–High</td>
+</tr>
+<tr>
+<td>HA Suitability</td>
+<td>Limited</td>
+<td>Strongly Recommended</td>
+</tr>
+<tr>
+<td>Segmentation Depth</td>
+<td>Moderate</td>
+<td>Advanced</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>SECTION 6 – WINDOWS NETWORKING ARCHITECTURE STANDARDS</h2>
+
+<h3>6.1 Active Directory &amp; DNS Design Principles</h3>
+<ul>
+<li>Domain controllers must use internal DNS only.</li>
+<li>Firewall must allow required AD ports between sites.</li>
+<li>Time synchronization must use domain hierarchy.</li>
+<li>Split DNS properly designed for VPN clients.</li>
+<li>Secure dynamic updates enforced.</li>
+</ul>
+
+<h3>6.2 Required AD Ports (Must Be Allowed Through Firewall)</h3>
+<ul>
+<li>TCP/UDP 53 – DNS</li>
+<li>TCP/UDP 88 – Kerberos</li>
+<li>TCP 135 – RPC</li>
+<li>TCP 389 – LDAP</li>
+<li>TCP 445 – SMB</li>
+<li>TCP 3268 – Global Catalog</li>
+<li>Ephemeral RPC range 49152–65535</li>
+</ul>
+
+<h3>6.3 DNS Troubleshooting Standards</h3>
+<ul>
+<li>Never point domain-joined systems to ISP DNS.</li>
+<li>Verify forward and reverse lookup zones.</li>
+<li>Check AD-integrated zone replication.</li>
+<li>Use nslookup and dcdiag for validation.</li>
+</ul>
+
+<h3>6.4 Site-to-Site VPN + AD Replication</h3>
+<ul>
+<li>VPN must allow full RPC range.</li>
+<li>MTU issues must be tested.</li>
+<li>Fragmented Kerberos packets monitored.</li>
+<li>Latency impact on replication reviewed.</li>
+</ul>
+
+<h3>6.5 Windows Server Core Networking Knowledge</h3>
+<ul>
+<li>Routing table analysis.</li>
+<li>ARP table validation.</li>
+<li>NIC binding order review.</li>
+<li>Windows Firewall advanced rules.</li>
+<li>Netsh and PowerShell diagnostics.</li>
+</ul>
+
+<h3>6.6 Common MSP Windows Networking Failure Patterns</h3>
+<ul>
+<li>Split tunnel misconfiguration.</li>
+<li>Improper DNS forwarders.</li>
+<li>Firewall blocking dynamic RPC.</li>
+<li>MTU mismatch across VPN.</li>
+<li>Asymmetric routing via SonicWall.</li>
+</ul>
+
+<h3>6.7 Troubleshooting Methodology (Authoritative)</h3>
+<ol>
+<li>Validate physical connectivity.</li>
+<li>Validate IP configuration.</li>
+<li>Validate DNS resolution.</li>
+<li>Validate routing table.</li>
+<li>Validate firewall logs.</li>
+<li>Validate AD replication health.</li>
+</ol>
+
+<hr>
+
+<p><strong>End of Master Reference Document</strong></p>
+
+</body>
+</html>
