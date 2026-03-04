@@ -1,20 +1,203 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>SonicWall MSP Knowledge Base – Master Reference</title>
+<title>MSP Master Knowledge Base – SonicWall &amp; Microsoft Expert Reference</title>
 <meta charset="UTF-8">
-<meta name="description" content="Authoritative MSP internal standards for TZ and NSa SonicWall deployments.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="World-class MSP knowledge base covering SonicWall firewall deployments and the complete Microsoft product stack — M365, Azure, Entra ID, Intune, Defender, Windows Server, SharePoint/Teams, and PowerShell automation.">
+<style>
+  /* === BASE === */
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 30px;
+    color: #1a1a2e;
+    background: #fafbfc;
+  }
+  h1 {
+    font-size: 2em;
+    border-bottom: 3px solid #0078d4;
+    padding-bottom: 12px;
+    color: #0078d4;
+  }
+  h2 {
+    color: #1a1a2e;
+    border-left: 5px solid #0078d4;
+    padding-left: 14px;
+    margin-top: 48px;
+    font-size: 1.5em;
+  }
+  h3 {
+    color: #2d3748;
+    margin-top: 28px;
+    font-size: 1.15em;
+  }
+  h4 {
+    color: #4a5568;
+    margin-top: 20px;
+    font-size: 1.05em;
+  }
+  hr {
+    border: none;
+    border-top: 2px solid #e2e8f0;
+    margin: 40px 0;
+  }
+  a { color: #0078d4; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* === TABLE OF CONTENTS === */
+  .toc {
+    background: #f0f4f8;
+    border: 1px solid #d2dae2;
+    border-radius: 8px;
+    padding: 20px 28px;
+    margin: 20px 0 40px 0;
+  }
+  .toc h2 {
+    border-left: none;
+    margin-top: 0;
+    color: #0078d4;
+    font-size: 1.3em;
+  }
+  .toc ul {
+    list-style: none;
+    padding-left: 0;
+    columns: 2;
+    column-gap: 30px;
+  }
+  .toc li {
+    padding: 4px 0;
+    break-inside: avoid;
+  }
+  .toc .toc-group {
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-top: 12px;
+    font-size: 0.95em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* === TABLES === */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 0.95em;
+  }
+  th, td {
+    border: 1px solid #cbd5e0;
+    padding: 10px 14px;
+    text-align: left;
+  }
+  th {
+    background: #0078d4;
+    color: #fff;
+    font-weight: 600;
+  }
+  tr:nth-child(even) { background: #f7fafc; }
+  tr:hover { background: #ebf4ff; }
+
+  /* === CODE BLOCKS === */
+  code {
+    background: #edf2f7;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  }
+  pre {
+    background: #1a1a2e;
+    color: #e2e8f0;
+    padding: 16px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.88em;
+    line-height: 1.5;
+    font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+  }
+
+  /* === CALLOUTS === */
+  .callout {
+    border-left: 4px solid #0078d4;
+    background: #ebf4ff;
+    padding: 12px 18px;
+    margin: 16px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .callout-warn {
+    border-left-color: #e53e3e;
+    background: #fff5f5;
+  }
+  .callout-tip {
+    border-left-color: #38a169;
+    background: #f0fff4;
+  }
+
+  /* === PRINT === */
+  @media print {
+    body { background: #fff; max-width: none; }
+    .toc { break-after: page; }
+    pre { background: #f5f5f5; color: #1a1a2e; border: 1px solid #ccc; }
+    th { background: #ddd; color: #000; }
+    h2 { break-before: page; }
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 768px) {
+    .toc ul { columns: 1; }
+    body { padding: 12px 16px; }
+  }
+</style>
 </head>
 
 <body>
 
-<h1>SonicWall MSP Knowledge Base – Master Reference</h1>
+<h1>MSP Master Knowledge Base</h1>
+<p><strong>Purpose:</strong> Authoritative security, deployment, and operational standards for managed SonicWall firewall environments and the complete Microsoft product stack. Designed for MSP technicians and engineers as a comprehensive daily reference.</p>
 
-<p><strong>Purpose:</strong> This document defines authoritative security, deployment, and operational standards for managed SonicWall TZ and NSa firewall environments.</p>
+<!-- ============================================================ -->
+<!-- TABLE OF CONTENTS                                            -->
+<!-- ============================================================ -->
+<div class="toc">
+<h2>Table of Contents</h2>
+<ul>
+  <li class="toc-group">SonicWall Firewall</li>
+  <li><a href="#s1">1 – MSP Global Security Baseline</a></li>
+  <li><a href="#s2">2 – TZ Series Deployment Standards</a></li>
+  <li><a href="#s3">3 – NSa Series Deployment Standards</a></li>
+  <li><a href="#s4">4 – MSP Operational Playbooks</a></li>
+  <li><a href="#s5">5 – Model Comparison Summary</a></li>
+  <li><a href="#s6">6 – Windows Networking Architecture</a></li>
 
-<hr>
+  <li class="toc-group">Microsoft 365 &amp; Cloud</li>
+  <li><a href="#s7">7 – Microsoft 365 / Exchange Online</a></li>
+  <li><a href="#s8">8 – Azure AD / Microsoft Entra ID</a></li>
+  <li><a href="#s9">9 – Windows Server &amp; Active Directory</a></li>
+  <li><a href="#s10">10 – Intune / Endpoint Manager</a></li>
 
-<h2>SECTION 1 – MSP GLOBAL SECURITY BASELINE (MANDATORY)</h2>
+  <li class="toc-group">Azure &amp; Security</li>
+  <li><a href="#s11">11 – Azure Cloud (IaaS / PaaS)</a></li>
+  <li><a href="#s12">12 – Microsoft Defender Suite</a></li>
+
+  <li class="toc-group">Collaboration &amp; Automation</li>
+  <li><a href="#s13">13 – SharePoint / Teams / OneDrive</a></li>
+  <li><a href="#s14">14 – PowerShell &amp; Automation</a></li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- SONICWALL SECTIONS 1-6 (EXISTING — PRESERVED EXACTLY)        -->
+<!-- ============================================================ -->
+
+<h2 id="s1">SECTION 1 – MSP GLOBAL SECURITY BASELINE (MANDATORY)</h2>
 
 <h3>1.1 Administrative Security</h3>
 <ul>
@@ -53,7 +236,7 @@
 
 <hr>
 
-<h2>SECTION 2 – TZ SERIES DEPLOYMENT STANDARDS</h2>
+<h2 id="s2">SECTION 2 – TZ SERIES DEPLOYMENT STANDARDS</h2>
 
 <h3>2.1 Performance Guardrails</h3>
 <ul>
@@ -82,7 +265,7 @@
 
 <hr>
 
-<h2>SECTION 3 – NSa SERIES DEPLOYMENT STANDARDS</h2>
+<h2 id="s3">SECTION 3 – NSa SERIES DEPLOYMENT STANDARDS</h2>
 
 <h3>3.1 Advanced Security Posture</h3>
 <ul>
@@ -101,7 +284,7 @@
 
 <hr>
 
-<h2>SECTION 4 – MSP OPERATIONAL PLAYBOOKS</h2>
+<h2 id="s4">SECTION 4 – MSP OPERATIONAL PLAYBOOKS</h2>
 
 <h3>4.1 New Client Onboarding</h3>
 <ol>
@@ -132,9 +315,9 @@
 
 <hr>
 
-<h2>SECTION 5 – MODEL COMPARISON SUMMARY</h2>
+<h2 id="s5">SECTION 5 – MODEL COMPARISON SUMMARY</h2>
 
-<table border="1">
+<table>
 <tr>
 <th>Capability</th>
 <th>TZ</th>
@@ -164,7 +347,7 @@
 
 <hr>
 
-<h2>SECTION 6 – WINDOWS NETWORKING ARCHITECTURE STANDARDS</h2>
+<h2 id="s6">SECTION 6 – WINDOWS NETWORKING ARCHITECTURE STANDARDS</h2>
 
 <h3>6.1 Active Directory &amp; DNS Design Principles</h3>
 <ul>
@@ -232,7 +415,1178 @@
 
 <hr>
 
+<!-- ============================================================ -->
+<!-- MICROSOFT SECTIONS 7-14 (NEW)                                -->
+<!-- ============================================================ -->
+
+<h2 id="s7">SECTION 7 – MICROSOFT 365 / EXCHANGE ONLINE</h2>
+
+<h3>7.1 Tenant Architecture &amp; Licensing</h3>
+<ul>
+<li>One tenant per organization. Multi-tenant management via Microsoft 365 Lighthouse or partner center for MSPs.</li>
+<li>Use Microsoft 365 Business Premium as baseline for SMB clients (includes Intune, Defender for Business, Entra ID P1).</li>
+<li>Enterprise clients: E3 for core productivity + compliance; E5 for advanced security, compliance, and analytics.</li>
+<li>F1/F3 licenses for frontline workers (kiosks, shared devices, deskless staff).</li>
+<li>Exchange Online Plan 1 included in Business Basic/Standard/Premium; Plan 2 adds archiving, legal hold, unlimited storage.</li>
+<li>Track license assignment with <code>Get-MgUser -All | Select DisplayName, AssignedLicenses</code> — never let unused licenses accumulate.</li>
+</ul>
+
+<h3>7.2 Mail Flow Architecture</h3>
+<ul>
+<li>MX records must point to Exchange Online Protection (EOP): <code>&lt;tenant&gt;.mail.protection.outlook.com</code>.</li>
+<li>If using a third-party gateway (Mimecast, Proofpoint, Barracuda), configure Enhanced Filtering for Connectors (skip listing) so EOP sees the true source IP.</li>
+<li>Outbound mail routes through EOP by default. Custom connectors only needed for smart host routing, partner orgs, or on-prem relay.</li>
+<li>Hybrid mail flow: Centralized (routes through on-prem) vs. Direct (each routes independently). Prefer direct for new deployments.</li>
+<li>Internal relay: Use receive connectors with TLS + certificate-based auth. Never allow anonymous relay to the internet.</li>
+</ul>
+
+<h4>7.2.1 Transport Rules (Mail Flow Rules)</h4>
+<ul>
+<li>Use transport rules for disclaimers, external sender warnings, attachment blocking, and encryption triggers.</li>
+<li>External email warning banner: Apply to all inbound mail from outside the organization — prepend HTML banner.</li>
+<li>Block auto-forwarding to external recipients: Transport rule with condition "message type = auto-forward" → reject.</li>
+<li>Encryption: Trigger Microsoft Purview Message Encryption via transport rule when subject contains "[Encrypt]" or sensitivity labels applied.</li>
+<li>Rule processing order matters — lower priority number = higher precedence. Document all rules in a runbook.</li>
+</ul>
+
+<h3>7.3 Email Authentication — SPF, DKIM, DMARC</h3>
+
+<div class="callout">
+<strong>Critical:</strong> All three records (SPF + DKIM + DMARC) must be configured for every domain. Missing any one creates spoofing and deliverability risks.
+</div>
+
+<h4>7.3.1 SPF (Sender Policy Framework)</h4>
+<ul>
+<li>DNS TXT record on the domain root. Authorizes which servers may send email for the domain.</li>
+<li>Standard M365 SPF: <code>v=spf1 include:spf.protection.outlook.com -all</code></li>
+<li>If using third-party services (Mailchimp, SendGrid, etc.), add their <code>include:</code> directives.</li>
+<li>Hard fail (<code>-all</code>) preferred over soft fail (<code>~all</code>) once all legitimate senders are identified.</li>
+<li>SPF has a 10-DNS-lookup limit. Use <code>include:</code> sparingly; flatten if approaching the limit.</li>
+<li>Validate with: <code>nslookup -q=txt domain.com</code> or <code>Resolve-DnsName domain.com -Type TXT</code></li>
+</ul>
+
+<h4>7.3.2 DKIM (DomainKeys Identified Mail)</h4>
+<ul>
+<li>Cryptographically signs outbound email. Prevents tampering in transit.</li>
+<li>Enable in Microsoft 365 Defender portal → Email &amp; collaboration → Policies → DKIM.</li>
+<li>Two CNAME records required per domain:
+  <ul>
+    <li><code>selector1._domainkey.domain.com</code> → <code>selector1-domain-com._domainkey.tenantname.onmicrosoft.com</code></li>
+    <li><code>selector2._domainkey.domain.com</code> → <code>selector2-domain-com._domainkey.tenantname.onmicrosoft.com</code></li>
+  </ul>
+</li>
+<li>After DNS propagation, enable DKIM signing in the portal. Rotation is automatic (M365 rotates keys).</li>
+<li>Third-party senders (Mailchimp, etc.) need their own DKIM configuration — each service provides separate CNAME/TXT records.</li>
+</ul>
+
+<h4>7.3.3 DMARC (Domain-based Message Authentication, Reporting &amp; Conformance)</h4>
+<ul>
+<li>DNS TXT record: <code>_dmarc.domain.com</code></li>
+<li>Start with monitoring: <code>v=DMARC1; p=none; rua=mailto:dmarc@domain.com; ruf=mailto:dmarc@domain.com</code></li>
+<li>After 2-4 weeks of monitoring, move to quarantine: <code>p=quarantine; pct=25</code> → gradually increase pct to 100.</li>
+<li>Final enforcement: <code>p=reject</code> — unauthorized mail is rejected outright.</li>
+<li>Use a DMARC reporting service (Valimail, dmarcian, EasyDMARC) to analyze aggregate reports.</li>
+<li>Subdomain policy: <code>sp=reject</code> to prevent subdomain spoofing.</li>
+</ul>
+
+<h3>7.4 Shared Mailboxes &amp; Resource Mailboxes</h3>
+<ul>
+<li>Shared mailboxes: No license required if under 50 GB. Auto-licensed at 50 GB+.</li>
+<li>Do not assign passwords to shared mailboxes — block sign-in. Access only via delegation.</li>
+<li>Send-As vs. Send-on-Behalf: Send-As hides the sender's identity; Send-on-Behalf shows "sent by X on behalf of Y".</li>
+<li>Resource mailboxes (Room/Equipment): Configure booking policies — auto-accept, conflict resolution, booking delegates.</li>
+<li>PowerShell: <code>New-Mailbox -Shared -Name "Support" -PrimarySmtpAddress support@domain.com</code></li>
+<li>Convert user mailbox to shared: <code>Set-Mailbox -Identity user@domain.com -Type Shared</code> — then remove license.</li>
+</ul>
+
+<h3>7.5 Retention Policies &amp; Litigation Hold</h3>
+<ul>
+<li>Microsoft Purview retention policies: Apply to Exchange, SharePoint, OneDrive, Teams, Yammer.</li>
+<li>Retention = keep + optional delete. Labels can be auto-applied based on sensitive info types or trainable classifiers.</li>
+<li>Litigation Hold: Preserves all mailbox content (including deleted items) indefinitely or for a specified duration. Requires Exchange Online Plan 2 or E3+.</li>
+<li>In-Place Hold (legacy) → replaced by Microsoft Purview retention. Migrate existing holds.</li>
+<li>eDiscovery: Content Search for ad-hoc searches; eDiscovery (Standard) for case management; eDiscovery (Premium) for advanced analytics, review sets, custodian management.</li>
+<li>Default MRM policy: Deletes items from Recoverable Items after 14 days. Extend to 30 days for compliance: <code>Set-Mailbox -SingleItemRecoveryEnabled $true -RetainDeletedItemsFor 30</code></li>
+</ul>
+
+<h3>7.6 Data Loss Prevention (DLP)</h3>
+<ul>
+<li>DLP policies detect and protect sensitive information (SSN, credit cards, health records) across Exchange, SharePoint, OneDrive, Teams, and endpoints.</li>
+<li>Use built-in sensitive information types (SITs) — 300+ available. Create custom SITs for org-specific data (account numbers, project codes).</li>
+<li>Policy tips: Warn users before they share sensitive data. Configure in policy settings.</li>
+<li>Incident reports: Auto-email to compliance team when DLP rule is triggered.</li>
+<li>Start with "test mode" (audit only) → review matches → enable enforcement.</li>
+<li>Endpoint DLP: Extends DLP to Windows/macOS devices. Requires Intune enrollment or onboarding to Defender for Endpoint.</li>
+</ul>
+
+<h3>7.7 Anti-Spam &amp; Anti-Phishing Policies (EOP)</h3>
+<ul>
+<li>Default policies provide baseline protection. Create custom policies for stricter controls per group.</li>
+<li>Anti-phishing: Enable mailbox intelligence, spoof intelligence, impersonation protection (protect priority accounts by name + domain).</li>
+<li>Safe Attachments (Defender for O365): Detonates attachments in a sandbox. Enable "Dynamic Delivery" for minimal user disruption.</li>
+<li>Safe Links (Defender for O365): URL rewriting + time-of-click verification. Enable for email, Teams, and Office apps.</li>
+<li>Quarantine policies: Define who can release quarantined messages. Admin-only for high-confidence phish; user self-service for spam.</li>
+<li>Tenant Allow/Block List: Override false positives/negatives. Block specific senders, URLs, or file hashes.</li>
+<li>Priority account protection: Tag executive accounts for enhanced detection and dedicated alerting.</li>
+</ul>
+
+<h3>7.8 Hybrid Exchange Configuration</h3>
+<ul>
+<li>Hybrid Configuration Wizard (HCW): Run from on-prem Exchange to establish hybrid. Minimum on-prem: Exchange 2016 CU23+ or 2019 CU12+.</li>
+<li>Azure AD Connect required for directory synchronization (users, groups, contacts).</li>
+<li>Free/Busy sharing: Requires Organization Relationship + OAuth authentication between on-prem and EXO.</li>
+<li>Mailbox migrations: Use Migration Batches (New-MigrationBatch). Cutover for &lt;150 mailboxes; Staged or Hybrid for larger orgs.</li>
+<li>Mail flow: Centralized transport (all outbound through on-prem) vs. Direct delivery. Direct is simpler and preferred for most MSP clients.</li>
+<li>Decommissioning on-prem: Keep at least one Exchange server for recipient management until fully migrated to cloud-only management (requires Exchange Management Tools on a workstation).</li>
+</ul>
+
+<h3>7.9 Troubleshooting Exchange Online</h3>
+<ol>
+<li>Message trace: Microsoft 365 Defender → Email &amp; collaboration → Exchange message trace. Search by sender, recipient, date range, status.</li>
+<li>NDR analysis: Check enhanced status codes (5.7.1 = relay denied, 5.1.1 = invalid recipient, 4.4.1 = timeout).</li>
+<li>Mail flow issues: Verify MX, SPF, connectors, transport rules. Use Remote Connectivity Analyzer (<code>testconnectivity.microsoft.com</code>).</li>
+<li>Outlook connectivity: Run Microsoft Support and Recovery Assistant (SaRA). Check Autodiscover: <code>Test-OutlookConnectivity</code>.</li>
+<li>Delegation not working: Verify permissions with <code>Get-MailboxPermission</code> and <code>Get-RecipientPermission</code>. Automapping issues → remove and re-add with <code>-AutoMapping $false</code>.</li>
+<li>Calendar issues: <code>Get-CalendarProcessing</code> for room mailbox settings; <code>Test-CalendarConnectivity</code> for hybrid free/busy.</li>
+</ol>
+
+<h3>7.10 Exchange Online Port &amp; Protocol Reference</h3>
+<table>
+<tr><th>Protocol</th><th>Port</th><th>Direction</th><th>Purpose</th></tr>
+<tr><td>HTTPS</td><td>443</td><td>Outbound</td><td>Outlook, OWA, EWS, PowerShell, ActiveSync</td></tr>
+<tr><td>SMTP</td><td>25</td><td>Inbound/Outbound</td><td>Mail flow between servers</td></tr>
+<tr><td>SMTP Submission</td><td>587</td><td>Outbound</td><td>Authenticated client SMTP (devices, apps)</td></tr>
+<tr><td>IMAP</td><td>993</td><td>Outbound</td><td>IMAP client access (TLS)</td></tr>
+<tr><td>POP</td><td>995</td><td>Outbound</td><td>POP client access (TLS)</td></tr>
+</table>
+
+<div class="callout-warn callout">
+<strong>Security:</strong> Disable POP and IMAP per-mailbox unless explicitly required. Use <code>Set-CASMailbox -PopEnabled $false -ImapEnabled $false</code>. Enforce Modern Authentication — block Basic Auth via Authentication Policies or Conditional Access.
+</div>
+
+<hr>
+
+<h2 id="s8">SECTION 8 – AZURE AD / MICROSOFT ENTRA ID</h2>
+
+<h3>8.1 Entra ID Architecture Overview</h3>
+<ul>
+<li>Microsoft Entra ID (formerly Azure AD) is the cloud identity provider for all Microsoft 365, Azure, and SaaS integrations.</li>
+<li>Entra ID Free: Included with M365. SSO, basic MFA, self-service password reset (cloud-only).</li>
+<li>Entra ID P1 (included in M365 Business Premium, E3): Conditional Access, group-based licensing, dynamic groups, on-prem writeback.</li>
+<li>Entra ID P2 (included in E5): Privileged Identity Management (PIM), Identity Protection, access reviews.</li>
+<li>Each tenant has a <code>.onmicrosoft.com</code> domain + custom verified domains. Verify domains via TXT record in DNS.</li>
+<li>Object limits: Free = 500k objects. P1/P2 = unlimited. Monitor with <code>Get-MgOrganization | Select DirectorySizeQuota</code>.</li>
+</ul>
+
+<h3>8.2 Conditional Access Policies</h3>
+
+<div class="callout">
+<strong>Conditional Access is the primary security control plane for Microsoft cloud.</strong> Every MSP client should have a baseline set of CA policies deployed from day one.
+</div>
+
+<h4>8.2.1 Mandatory Baseline Policies</h4>
+<ol>
+<li><strong>Require MFA for all users</strong> — Target: All users. Exclude: Break-glass accounts. Grant: Require MFA.</li>
+<li><strong>Require MFA for admin roles</strong> — Target: Directory roles (Global Admin, Exchange Admin, etc.). Grant: Require MFA + compliant device.</li>
+<li><strong>Block legacy authentication</strong> — Target: All users. Condition: Client apps = Exchange ActiveSync, Other clients. Grant: Block.</li>
+<li><strong>Require compliant device for Office apps</strong> — Target: All users. Cloud apps: Office 365. Grant: Require device compliance (Intune).</li>
+<li><strong>Block sign-in from untrusted countries</strong> — Target: All users. Condition: Named locations = all except allowed countries. Grant: Block.</li>
+<li><strong>Require app protection for mobile</strong> — Target: All users. Condition: Device platform = iOS, Android. Grant: Require approved client app or app protection policy.</li>
+</ol>
+
+<h4>8.2.2 Conditional Access Design Principles</h4>
+<ul>
+<li>Always maintain 2 break-glass accounts excluded from all CA policies. Cloud-only, no MFA, strong 20+ character passwords stored in a physical safe.</li>
+<li>Use "Report-only" mode for 7-14 days before enforcing a new policy. Review sign-in logs for unintended blocks.</li>
+<li>Name policies consistently: <code>CA001 - Grant - Require MFA for All Users</code>, <code>CA002 - Block - Legacy Authentication</code>.</li>
+<li>Use named locations for trusted IPs (office networks, VPN exit points).</li>
+<li>Session controls: Sign-in frequency (re-auth every X hours), persistent browser session, Conditional Access App Control (MCAS proxy).</li>
+<li>Device filters: Target specific hardware, OS versions, or compliance states.</li>
+</ul>
+
+<h3>8.3 Multi-Factor Authentication (MFA)</h3>
+<ul>
+<li>Entra ID MFA methods (strongest to weakest): FIDO2 security key → Windows Hello for Business → Microsoft Authenticator (passwordless) → Authenticator push notification → OATH hardware token → SMS/Voice call.</li>
+<li>Security defaults: Free-tier MFA for all users. Disable once Conditional Access is configured (they conflict).</li>
+<li>Number matching: Enabled by default for Authenticator push. Prevents MFA fatigue attacks.</li>
+<li>Per-user MFA (legacy portal): Do not use. Migrate to Conditional Access-based MFA.</li>
+<li>Registration campaigns: Force users to set up Authenticator via <code>Authentication methods → Registration campaign</code>.</li>
+<li>Temporary Access Pass (TAP): One-time or time-limited passcode for onboarding users to passwordless methods. Configure in Authentication Methods.</li>
+</ul>
+
+<h3>8.4 Hybrid Identity — Azure AD Connect / Cloud Sync</h3>
+<ul>
+<li><strong>Azure AD Connect (legacy)</strong>: Installed on-prem, syncs AD DS objects to Entra ID. Supports Password Hash Sync (PHS), Pass-Through Authentication (PTA), and Federation (ADFS).</li>
+<li><strong>Entra Cloud Sync (modern)</strong>: Lightweight agent-based sync. Supports multi-forest, no need for dedicated server. Preferred for new deployments.</li>
+<li>Password Hash Sync (PHS): Recommended. Hashes synced to cloud. Enables leaked credential detection, seamless SSO.</li>
+<li>Pass-Through Authentication (PTA): Validates passwords against on-prem AD in real-time. Use when regulatory requirements prohibit cloud password storage.</li>
+<li>Seamless SSO: Auto-signs in domain-joined users on the corporate network. Requires computer account in AD.</li>
+<li>Password writeback: Allows cloud SSPR to write password changes back to on-prem AD. Requires P1+ license.</li>
+<li>Attribute filtering: Sync only required OUs. Never sync service accounts, admin accounts, or test objects.</li>
+<li>Monitoring: Azure AD Connect Health (P1 required) provides sync error alerts, performance monitoring.</li>
+</ul>
+
+<h4>8.4.1 Common Sync Errors &amp; Resolution</h4>
+<table>
+<tr><th>Error</th><th>Cause</th><th>Resolution</th></tr>
+<tr><td>AttributeValueMustBeUnique</td><td>Duplicate proxyAddress or UPN</td><td>Fix duplicate in on-prem AD, force delta sync</td></tr>
+<tr><td>InvalidSoftMatch</td><td>UPN or SMTP mismatch between cloud and on-prem</td><td>Align UPN/SMTP, use hard match if needed</td></tr>
+<tr><td>LargeObject</td><td>User has too many proxy addresses or group memberships</td><td>Reduce proxy addresses or split groups</td></tr>
+<tr><td>DataValidationFailed</td><td>Invalid characters in attributes</td><td>Clean attribute values in AD (use IdFix tool)</td></tr>
+<tr><td>IdentitySync — ExportError</td><td>Permissions issue on cloud side</td><td>Re-run AAD Connect wizard, verify connector account</td></tr>
+</table>
+
+<h3>8.5 Application Registrations &amp; Enterprise Apps</h3>
+<ul>
+<li>App registrations: Developer-facing configuration (client ID, redirect URIs, certificates/secrets, API permissions).</li>
+<li>Enterprise apps: Admin-facing view (user assignments, SSO config, provisioning, Conditional Access targeting).</li>
+<li>SSO protocols: SAML 2.0, OIDC/OAuth 2.0, Header-based, Password-based. Prefer OIDC for new integrations.</li>
+<li>User consent: Block by default. Require admin consent for all third-party apps. Configure in Enterprise apps → Consent and permissions.</li>
+<li>SCIM provisioning: Automate user lifecycle (create, update, disable) to SaaS apps. Supported for ServiceNow, Salesforce, Slack, etc.</li>
+<li>Certificate rotation: Track expiry of SAML signing certificates and app secrets. Set calendar reminders 30 days before expiry.</li>
+<li>Managed identities: For Azure resources (VMs, App Services) — eliminates credential management. Use system-assigned for single-resource, user-assigned for shared identity.</li>
+</ul>
+
+<h3>8.6 Privileged Identity Management (PIM)</h3>
+<ul>
+<li>Requires Entra ID P2 license.</li>
+<li>Just-in-time activation: Admins request role elevation for limited duration (1-24 hours).</li>
+<li>Require approval for critical roles: Global Admin, Exchange Admin, Security Admin.</li>
+<li>Require MFA + justification for all role activations.</li>
+<li>Access reviews: Quarterly review of permanent role assignments. Auto-remove if not reconfirmed.</li>
+<li>Eligible vs. Active assignments: Use eligible for all roles. Active (permanent) only for break-glass accounts.</li>
+<li>Alert on suspicious activations: PIM sends alerts for unusual patterns.</li>
+</ul>
+
+<h3>8.7 Identity Protection</h3>
+<ul>
+<li>Requires Entra ID P2.</li>
+<li>User risk: Detects compromised credentials (leaked password databases, impossible travel, malware-linked sign-ins).</li>
+<li>Sign-in risk: Real-time evaluation of each authentication attempt (unfamiliar location, anonymous IP, atypical travel).</li>
+<li>Risk-based Conditional Access: Low risk → allow; Medium → require MFA; High → block + force password reset.</li>
+<li>Risky users report: Review weekly. Confirm compromised, dismiss false positives, or force password reset.</li>
+<li>Risk detections feed into Microsoft Sentinel for SIEM correlation.</li>
+</ul>
+
+<h3>8.8 Entra ID Troubleshooting</h3>
+<ol>
+<li>Sign-in logs: Entra ID → Monitoring → Sign-in logs. Filter by user, app, status, CA policy, risk level.</li>
+<li>Audit logs: Track admin actions (password resets, role assignments, policy changes).</li>
+<li>CA policy evaluation: Sign-in log → Conditional Access tab shows which policies applied/failed/not-applied and why.</li>
+<li>"What If" tool: Simulate CA policy evaluation for a specific user + app + conditions before deploying.</li>
+<li>Token issues: Check token lifetime policies. Default access token = 1 hour, refresh token = 90 days (sliding).</li>
+<li>Guest access issues: Check B2B collaboration settings, cross-tenant access policies, and CA policies targeting "Guest or external users".</li>
+</ol>
+
+<hr>
+
+<h2 id="s9">SECTION 9 – WINDOWS SERVER &amp; ACTIVE DIRECTORY</h2>
+
+<h3>9.1 Active Directory Domain Services (AD DS) Design</h3>
+<ul>
+<li>Single-domain, single-forest is standard for SMB MSP clients. Multi-domain only for regulatory isolation or mergers.</li>
+<li>Functional levels: Raise to Windows Server 2016+ to enable Privileged Access Management, time-based group membership.</li>
+<li>Domain naming: Use a subdomain of a public domain (e.g., <code>ad.company.com</code>) — never <code>.local</code> or single-label domains.</li>
+<li>Minimum 2 DCs per domain for redundancy. Place a DC at each major site with 50+ users.</li>
+<li>AD Recycle Bin: Enable immediately on all domains. <code>Enable-ADOptionalFeature 'Recycle Bin Feature' -Scope ForestOrConfigurationSet -Target 'forest.com'</code></li>
+<li>Fine-Grained Password Policies (PSOs): Use for privileged accounts. Minimum 16 characters, 90-day max age, no password reuse for 24 generations.</li>
+</ul>
+
+<h3>9.2 FSMO Roles</h3>
+<table>
+<tr><th>Role</th><th>Scope</th><th>Function</th><th>Impact of Loss</th></tr>
+<tr><td>Schema Master</td><td>Forest-wide</td><td>Controls AD schema modifications</td><td>Low — rarely needed</td></tr>
+<tr><td>Domain Naming Master</td><td>Forest-wide</td><td>Add/remove domains in forest</td><td>Low — rarely needed</td></tr>
+<tr><td>PDC Emulator</td><td>Domain-wide</td><td>Password changes, time sync, GPO editing, account lockout</td><td>High — immediate impact</td></tr>
+<tr><td>RID Master</td><td>Domain-wide</td><td>Allocates RID pools for new SID creation</td><td>Medium — new objects fail once pool exhausted</td></tr>
+<tr><td>Infrastructure Master</td><td>Domain-wide</td><td>Cross-domain reference updates</td><td>Low in single-domain</td></tr>
+</table>
+
+<pre><code># View FSMO role holders
+netdom query fsmo
+
+# Transfer a role (requires connection to current holder)
+Move-ADDirectoryServerOperationMasterRole -Identity "NewDC" -OperationMasterRole PDCEmulator
+
+# Seize a role (only if current holder is permanently offline)
+Move-ADDirectoryServerOperationMasterRole -Identity "NewDC" -OperationMasterRole PDCEmulator -Force</code></pre>
+
+<h3>9.3 Group Policy (GPO) Standards</h3>
+<ul>
+<li>Naming convention: <code>[OU] - [Category] - [Description]</code> (e.g., <code>Workstations - Security - BitLocker Enforcement</code>).</li>
+<li>Never modify the Default Domain Policy except for: Password Policy, Account Lockout Policy, Kerberos Policy.</li>
+<li>Never modify the Default Domain Controllers Policy except for: Audit Policy, User Rights Assignment for DCs.</li>
+<li>Delegation: Use separate GPOs per function. One GPO per setting area is easier to troubleshoot than monolithic GPOs.</li>
+<li>WMI filters: Use sparingly — they execute on every GPO processing cycle and slow logon/startup.</li>
+<li>Security filtering: Prefer security group filtering over WMI where possible.</li>
+<li>Loopback processing: Use "Replace" mode for kiosk/terminal servers. "Merge" for conference room PCs.</li>
+<li>Central Store: Create in <code>\\domain\SYSVOL\domain\Policies\PolicyDefinitions</code> for consistent ADMX template management.</li>
+</ul>
+
+<h4>9.3.1 GPO Troubleshooting</h4>
+<pre><code># Generate RSoP report
+gpresult /h C:\Temp\gpreport.html /f
+gpresult /r /scope:computer
+gpresult /r /scope:user
+
+# Force GPO refresh
+gpupdate /force
+
+# Verify GPO replication across DCs
+repadmin /showrepl
+Get-ADReplicationPartnerMetadata -Target "DC01" -Scope Domain</code></pre>
+
+<h3>9.4 DNS Server Standards</h3>
+<ul>
+<li>AD-integrated zones: Always use AD-integrated for domain zones. Provides secure dynamic updates and multi-master replication.</li>
+<li>Forwarders: Point to reliable external resolvers (Cloudflare 1.1.1.1, Google 8.8.8.8, Quad9 9.9.9.9). Never use ISP DNS as primary.</li>
+<li>Conditional forwarders: Use for partner domains, Azure Private DNS zones, or split-brain DNS scenarios.</li>
+<li>Scavenging: Enable aging and scavenging. No-refresh interval: 7 days. Refresh interval: 7 days. Scavenging period: 7 days. Enable on at least one DC.</li>
+<li>Reverse lookup zones: Create for all internal subnets. Required for PTR records used by logging and some applications.</li>
+<li>DNS debug logging: Enable temporarily for troubleshooting only — generates significant disk I/O.</li>
+</ul>
+
+<pre><code># Check DNS health
+dcdiag /test:dns /v /e
+Resolve-DnsName -Name server01.ad.company.com -Server DC01
+
+# Clear DNS cache
+Clear-DnsServerCache
+Clear-DnsClientCache
+
+# Check zone health
+Get-DnsServerZone -ComputerName DC01
+Get-DnsServerResourceRecord -ZoneName "ad.company.com" -ComputerName DC01</code></pre>
+
+<h3>9.5 DHCP Standards</h3>
+<ul>
+<li>DHCP failover: Configure hot-standby (primary/secondary) or load-balance mode between two servers. Maximum Client Lead Time (MCLT): 1 hour.</li>
+<li>Scope design: One scope per VLAN/subnet. Reserve 10-20% of range for static assignments (servers, printers, APs).</li>
+<li>Lease duration: 8 hours for wired, 4 hours for wireless, 30 minutes for guest networks.</li>
+<li>DHCP options: Option 6 (DNS servers), Option 15 (DNS suffix), Option 3 (default gateway), Option 44 (WINS — only if still required).</li>
+<li>Reservations: Use for printers, access points, IoT devices, cameras. Document MAC-to-IP mappings.</li>
+<li>Authorization: DHCP servers must be authorized in AD. Rogue DHCP detection via monitoring.</li>
+</ul>
+
+<h3>9.6 DFS (Distributed File System)</h3>
+<ul>
+<li>DFS Namespaces: Domain-based namespace for simplified UNC paths (<code>\\domain\Share</code> instead of <code>\\Server\Share</code>).</li>
+<li>DFS Replication (DFSR): Multi-master file replication between servers. Use for shared content, not user home drives (conflict risk).</li>
+<li>SYSVOL replication: Modern domains use DFSR. Legacy FRS → migrate to DFSR: <code>dfsrmig /SetGlobalState 3</code>.</li>
+<li>Staging area: Size to hold the largest 32 files replicated. Undersized staging causes excessive re-staging and WAN traffic.</li>
+<li>Conflict resolution: Last-writer-wins by default. Losing file moved to ConflictAndDeleted folder. Monitor this folder size.</li>
+<li>Initial sync: Pre-seed with robocopy for large datasets to avoid full replication over WAN.</li>
+</ul>
+
+<h3>9.7 Windows Server Update Services (WSUS)</h3>
+<ul>
+<li>WSUS on-prem: Use for environments without Intune/SCCM. Deployment via GPO: <code>Computer → Admin Templates → Windows Components → Windows Update</code>.</li>
+<li>Upstream/downstream: Central WSUS server syncs from Microsoft Update; branch offices use downstream (replica mode).</li>
+<li>Classification approval: Critical Updates + Security Updates = auto-approve after 7-day test period. Feature packs, drivers = manual approval only.</li>
+<li>Maintenance: Run WSUS cleanup wizard monthly. Decline superseded updates. Re-index SUSDB quarterly.</li>
+<li>WSUS + Intune: Don't use both. If Intune manages updates, set <code>Do not connect to any Windows Update Internet locations</code> GPO to prevent conflicts.</li>
+</ul>
+
+<pre><code># WSUS database maintenance (run in SQL on SUSDB)
+EXEC spGetObsoleteUpdatesToCleanup
+EXEC spDeclineExpiredUpdates
+EXEC spDeclineSupersededUpdates
+
+# WSUS cleanup via PowerShell
+Invoke-WsusServerCleanup -CleanupObsoleteUpdates -CleanupUnneededContentFiles -CompressUpdates</code></pre>
+
+<h3>9.8 Hyper-V Standards</h3>
+<ul>
+<li>Hyper-V host: Dedicated role — do not combine with DC, file server, or other roles on production hosts.</li>
+<li>Generation 2 VMs: Default for all new VMs (UEFI, Secure Boot, VHDX, better performance).</li>
+<li>Virtual switches: External (VM + host + physical network), Internal (VM + host only), Private (VM-to-VM only).</li>
+<li>Checkpoints: Use production checkpoints (application-consistent via VSS). Disable standard checkpoints in production.</li>
+<li>Live migration: Configure Kerberos constrained delegation between hosts. Use SMB for live migration traffic on dedicated VLAN.</li>
+<li>Replica: Hyper-V Replica for DR — replicates VMs to a secondary site. RPO: 30 seconds, 5 minutes, or 15 minutes.</li>
+<li>Resource allocation: Never over-commit memory on production hosts. Dynamic memory acceptable for non-critical VMs with proper min/max/buffer settings.</li>
+<li>Networking: Enable SR-IOV for high-performance network workloads. Use NIC teaming (SET — Switch Embedded Teaming) on 2016+.</li>
+</ul>
+
+<h3>9.9 Windows Server Clustering</h3>
+<ul>
+<li>Failover Clustering: Minimum 2 nodes. Requires shared storage (SAN, S2D, or iSCSI). All nodes on same AD domain.</li>
+<li>Cluster validation: Always run <code>Test-Cluster</code> before creating or modifying. All tests must pass.</li>
+<li>Quorum: Use disk witness for even-node clusters, cloud witness (Azure Storage) for 2-node clusters, file share witness if no Azure available.</li>
+<li>Cluster-Aware Updating (CAU): Automates patching with rolling updates. Nodes drain, patch, reboot, rejoin automatically.</li>
+<li>Storage Spaces Direct (S2D): Software-defined storage using local disks across cluster nodes. Minimum 2 nodes, minimum 4 drives per node.</li>
+<li>CSV (Cluster Shared Volumes): Single namespace for shared VHDX storage. Required for Hyper-V VMs on clustered storage.</li>
+</ul>
+
+<h3>9.10 Active Directory Certificate Services (AD CS / PKI)</h3>
+<ul>
+<li>Two-tier hierarchy: Offline root CA + online issuing CA. Never put the root CA online in production.</li>
+<li>Root CA: Standalone, offline, issue only subordinate CA certificates. CRL validity: 1 year. Store root cert and CRL in AD.</li>
+<li>Issuing CA: Enterprise (AD-integrated), online, issues user/computer/server certificates.</li>
+<li>Certificate templates: Duplicate default templates, never modify originals. Set minimum key size 2048-bit RSA or ECDSA P-256.</li>
+<li>Auto-enrollment: Configure via GPO for computer certificates (802.1X, IPsec, LDAPS). Requires template permissions + GPO.</li>
+<li>CRL/OCSP: Publish CRL to AD + HTTP. CDP and AIA must be accessible by all validating entities. OCSP responder for high-volume environments.</li>
+<li>Key archival: Enable for user encryption certificates (EFS, S/MIME). Do not enable for signing certificates.</li>
+</ul>
+
+<h3>9.11 AD Replication Troubleshooting</h3>
+<pre><code># Check replication status
+repadmin /replsummary
+repadmin /showrepl
+repadmin /queue
+
+# Force replication
+repadmin /syncall /AdeP
+
+# Check for lingering objects
+repadmin /removelingeringobjects DC01 DC02 "DC=domain,DC=com" /advisory_mode
+
+# AD health
+dcdiag /v /c /e
+dcdiag /test:replications
+
+# Check USN rollback (critical)
+repadmin /showutdvec DC01 "DC=domain,DC=com"</code></pre>
+
+<h3>9.12 Common MSP Windows Server Failure Patterns</h3>
+<ul>
+<li>SYSVOL not replicating (DFSR journal wrap — Event ID 2213). Fix: non-authoritative restore of DFSR member.</li>
+<li>AD replication failing after snapshot restore (USN rollback). Fix: Forcefully demote and re-promote the DC. Never restore DC snapshots without proper VM-GenerationID support.</li>
+<li>Time sync drift causing Kerberos failures. Fix: PDC emulator must sync to external NTP; all others sync to domain hierarchy.</li>
+<li>LDAP channel binding / signing enforcement breaking legacy apps. Test with diagnostic logging before enforcing.</li>
+<li>Expired certificates on LDAPS — breaks Entra ID Connect, RADIUS, third-party integrations. Monitor with PKI Health monitoring.</li>
+<li>Group Policy not applying — check blocked inheritance, denied permissions, loopback processing, WMI filter failures.</li>
+</ul>
+
+<hr>
+
+<h2 id="s10">SECTION 10 – INTUNE / ENDPOINT MANAGER</h2>
+
+<h3>10.1 Intune Architecture &amp; Licensing</h3>
+<ul>
+<li>Microsoft Intune is the cloud-native endpoint management platform (MDM + MAM) for Windows, macOS, iOS, Android, and Linux.</li>
+<li>Licensing: Included in M365 Business Premium, E3, E5, EMS E3/E5. Standalone Intune Plan 1 or Plan 2 available.</li>
+<li>Intune Plan 2 adds: Microsoft Tunnel for MAM, Cloud PKI, firmware-over-the-air (FOTA), specialty device management.</li>
+<li>Intune Suite: Advanced analytics, endpoint privilege management, remote help, enterprise app management.</li>
+<li>Management portal: <code>intune.microsoft.com</code> (Intune admin center, formerly Endpoint Manager admin center).</li>
+<li>Integration: Tight integration with Entra ID (CA policies), Defender for Endpoint (compliance signals), Autopilot, and Windows Update for Business.</li>
+</ul>
+
+<h3>10.2 Device Enrollment</h3>
+
+<h4>10.2.1 Windows Enrollment Methods</h4>
+<table>
+<tr><th>Method</th><th>Use Case</th><th>User Interaction</th></tr>
+<tr><td>Windows Autopilot</td><td>New device provisioning, zero-touch</td><td>User signs in at OOBE, device auto-configures</td></tr>
+<tr><td>Entra ID Join</td><td>Cloud-native devices, no on-prem AD</td><td>Settings → Accounts → Access work or school → Join</td></tr>
+<tr><td>Hybrid Entra ID Join</td><td>Domain-joined devices + cloud management</td><td>Automatic via GPO + Entra ID Connect</td></tr>
+<tr><td>Bulk enrollment</td><td>Kiosk, shared devices</td><td>Provisioning package (PPKG) via Windows Configuration Designer</td></tr>
+<tr><td>Co-management (SCCM)</td><td>Transitioning from ConfigMgr</td><td>Automatic via SCCM + Intune connector</td></tr>
+</table>
+
+<h4>10.2.2 iOS/iPadOS Enrollment</h4>
+<ul>
+<li>Apple Business Manager (ABM): Required for automated enrollment (zero-touch). Purchase or add devices via serial/order number.</li>
+<li>Apple Push Notification Certificate (APNs): <strong>Must renew annually</strong> — if it expires, all iOS devices lose management. Set calendar reminders 30 days before expiry.</li>
+<li>Supervised mode: Enables additional management controls (silent app install, block AirDrop, kiosk mode). Requires ABM enrollment or Apple Configurator.</li>
+<li>User enrollment (BYOD): Managed Apple ID, separate data container, limited admin control. Respects user privacy.</li>
+</ul>
+
+<h4>10.2.3 Android Enrollment</h4>
+<ul>
+<li>Android Enterprise: Required — legacy device admin is deprecated.</li>
+<li>Fully managed: Company-owned, entire device managed. For dedicated/single-use devices.</li>
+<li>Work profile (BYOD): Separate container for work apps/data. Personal data not visible to IT.</li>
+<li>Work profile on company-owned: Best of both — IT controls device + separate work container.</li>
+<li>Dedicated devices (kiosk): Multi-app or single-app kiosk mode via managed Google Play.</li>
+<li>Managed Google Play: Required for app distribution. Link to tenant in Intune → Connectors.</li>
+</ul>
+
+<h3>10.3 Windows Autopilot</h3>
+<ul>
+<li>Zero-touch deployment: User opens new laptop, connects to internet, signs in with org credentials → device auto-enrolls, configures, installs apps.</li>
+<li>Hardware hash: Register devices via CSV upload (from OEM), or script: <code>Get-WindowsAutopilotInfo -OutputFile autopilot.csv</code>.</li>
+<li>Deployment profiles:
+  <ul>
+    <li><strong>User-driven</strong>: Standard deployment. User signs in at OOBE. Entra ID Join or Hybrid Entra ID Join.</li>
+    <li><strong>Self-deploying</strong>: No user interaction (kiosks, shared devices). Requires TPM 2.0.</li>
+    <li><strong>Pre-provisioned</strong>: IT technician completes first phase (apps, policies), user completes setup. White-glove approach.</li>
+  </ul>
+</li>
+<li>Enrollment Status Page (ESP): Shows progress during provisioning. Block device use until all required apps/policies are installed.</li>
+<li>Group tags: Assign tags to devices for dynamic group membership → target specific Autopilot profiles and app assignments.</li>
+<li>Autopilot Reset: Wipe and re-provision existing device without re-imaging. User data removed, Entra ID join + Intune enrollment preserved.</li>
+</ul>
+
+<h3>10.4 Compliance Policies</h3>
+<ul>
+<li>Compliance policies define minimum device health requirements. Non-compliant devices can be blocked by Conditional Access.</li>
+<li>Windows compliance:
+  <ul>
+    <li>BitLocker encryption required</li>
+    <li>Firewall enabled</li>
+    <li>Antivirus enabled and up-to-date</li>
+    <li>Minimum OS version</li>
+    <li>Require password/PIN with minimum complexity</li>
+    <li>Trusted Platform Module (TPM) required</li>
+    <li>Defender for Endpoint risk score: Clear or Low</li>
+  </ul>
+</li>
+<li>Non-compliance actions: Notify user → mark non-compliant (immediately or after grace period) → retire device (after X days).</li>
+<li>Compliance + Conditional Access: Create CA policy requiring "compliant device" → non-compliant devices blocked from M365.</li>
+<li>Custom compliance scripts: PowerShell scripts that return JSON — evaluate custom conditions not covered by built-in checks.</li>
+</ul>
+
+<h3>10.5 Configuration Profiles</h3>
+<ul>
+<li>Device restrictions: Control camera, Bluetooth, USB, screen capture, password policies, telemetry.</li>
+<li>Wi-Fi profiles: Deploy SSID, authentication type (802.1X, WPA2-PSK), certificate-based auth.</li>
+<li>VPN profiles: Configure Always On VPN, per-app VPN, split tunneling settings.</li>
+<li>Email profiles: Auto-configure Outlook for iOS/Android with account settings, authentication, data protection.</li>
+<li>Certificate profiles: Deploy SCEP or PKCS certificates for Wi-Fi auth, VPN auth, S/MIME. Requires NDES connector or Cloud PKI.</li>
+<li>Settings Catalog: 5000+ granular settings. Replace ADMX-backed profiles for new deployments.</li>
+<li>Administrative Templates (ADMX): Import custom ADMX for third-party applications (Chrome, Firefox, Adobe).</li>
+<li>Endpoint Security profiles: Antivirus, disk encryption (BitLocker), firewall, attack surface reduction (ASR), endpoint detection and response (EDR).</li>
+</ul>
+
+<h3>10.6 Application Management</h3>
+<ul>
+<li>Windows apps: Win32 apps (.intunewin format — wrap with IntuneWinAppUtil.exe), Microsoft Store apps, web links, Line-of-Business (.msi).</li>
+<li>Win32 app packaging:
+<pre><code># Wrap installer to .intunewin format
+IntuneWinAppUtil.exe -c "C:\Source" -s "setup.exe" -o "C:\Output"
+
+# Detection rules: File, Registry, or custom PowerShell script
+# Install command example: setup.exe /quiet /norestart
+# Uninstall command: setup.exe /uninstall /quiet</code></pre>
+</li>
+<li>App dependencies: Install prerequisite apps first (e.g., .NET Framework before LOB app).</li>
+<li>App supersedence: Replace older versions with new versions automatically.</li>
+<li>Required vs. Available: Required = auto-install. Available = user-initiated from Company Portal.</li>
+<li>App protection policies (MAM): Protect corporate data in mobile apps without device enrollment. Cut/copy/paste restrictions, PIN to access, selective wipe.</li>
+<li>Managed Google Play / Apple VPP: Use volume purchase for iOS/Android app deployment.</li>
+</ul>
+
+<h3>10.7 Windows Update Management (WUfB)</h3>
+<ul>
+<li>Windows Update for Business (WUfB): Cloud-native update management via Intune. Replaces WSUS for Intune-managed devices.</li>
+<li>Update rings: Define deferral periods. Recommended:
+  <ul>
+    <li><strong>Pilot ring</strong>: 0-day deferral for quality updates, 0-day for feature updates. IT staff + early adopters.</li>
+    <li><strong>Broad ring</strong>: 7-day deferral for quality, 30-day for feature. Standard users.</li>
+    <li><strong>Critical ring</strong>: 14-day deferral for quality, 60-day for feature. Servers, sensitive systems.</li>
+  </ul>
+</li>
+<li>Feature update policies: Target specific Windows version (e.g., Windows 11 24H2). Prevents unwanted upgrades.</li>
+<li>Driver updates: Manage driver approval through WUfB. Auto-approve or manual approval per driver.</li>
+<li>Expedited updates: Push critical security updates immediately (bypasses deferral). Use for zero-day patches.</li>
+<li>Windows Update reports: Monitor update compliance in Intune → Reports → Windows updates.</li>
+</ul>
+
+<h3>10.8 Intune Troubleshooting</h3>
+<ol>
+<li>Device sync: Check last sync time in Intune admin center. Force sync from device: Settings → Accounts → Access work or school → Info → Sync.</li>
+<li>Enrollment failures: Check Entra ID Join prerequisites, Autopilot profile assignment, enrollment restrictions, device cap per user (default 15).</li>
+<li>Policy not applying: Check assignment groups, filters, platform targeting. Use Intune → Troubleshoot + support → per-user view.</li>
+<li>Win32 app install failures: Check <code>C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log</code>.</li>
+<li>Compliance evaluation: Check compliance state per-policy. Verify Defender for Endpoint connector if using risk-based compliance.</li>
+<li>MDM diagnostic: Collect MDM logs via Settings → Accounts → Access work or school → Export management logs. Or: <code>mdmdiagnosticstool.exe -out C:\Temp\MDMLogs</code>.</li>
+</ol>
+
+<hr>
+
+<h2 id="s11">SECTION 11 – AZURE CLOUD (IaaS / PaaS)</h2>
+
+<h3>11.1 Azure Architecture Fundamentals</h3>
+<ul>
+<li>Hierarchy: Management Groups → Subscriptions → Resource Groups → Resources. Design hierarchy before deploying.</li>
+<li>Naming convention: <code>{resource-type}-{workload}-{environment}-{region}-{instance}</code> (e.g., <code>vm-web-prod-eastus-001</code>).</li>
+<li>Tags: Mandatory tags on all resources — <code>Environment</code>, <code>Owner</code>, <code>CostCenter</code>, <code>Application</code>. Enforce via Azure Policy.</li>
+<li>Regions: Deploy to paired regions for DR. Data residency compliance drives region selection.</li>
+<li>Landing zones: Use Azure Landing Zone accelerator for enterprise-scale deployments (management, connectivity, identity, platform subscriptions).</li>
+<li>Azure Resource Manager (ARM): All Azure operations go through ARM. Templates (Bicep or ARM JSON) for Infrastructure as Code.</li>
+</ul>
+
+<h3>11.2 Virtual Machines</h3>
+<ul>
+<li>VM sizing: D-series for general purpose, E-series for memory-intensive, F-series for CPU-intensive, L-series for storage-intensive.</li>
+<li>Managed disks: Always use managed disks. Premium SSD for production, Standard SSD for dev/test, Standard HDD for backup/archive.</li>
+<li>Availability: Availability Zones (99.99% SLA) &gt; Availability Sets (99.95% SLA). Use zones where available.</li>
+<li>VM Scale Sets (VMSS): Auto-scaling for web tiers and stateless workloads. Flexible orchestration mode for mixed workloads.</li>
+<li>Accelerated networking: Enable on all D-series and larger VMs. Provides SR-IOV for lower latency and higher throughput.</li>
+<li>Azure Hybrid Benefit: Use existing Windows Server or SQL Server licenses. Saves up to 85% on VM costs.</li>
+<li>Backup: Azure Backup with Recovery Services Vault. Daily backup with 30-day retention minimum. Test restore quarterly.</li>
+<li>Update management: Azure Update Manager for patching Azure VMs and Arc-enabled on-prem servers.</li>
+</ul>
+
+<pre><code># VM diagnostics
+az vm get-instance-view --resource-group myRG --name myVM --query instanceView.statuses
+az vm boot-diagnostics get-boot-log --resource-group myRG --name myVM
+
+# Serial console access (when RDP fails)
+# Azure Portal → VM → Serial console (requires boot diagnostics enabled)</code></pre>
+
+<h3>11.3 Virtual Networking (VNet)</h3>
+<ul>
+<li>VNet design: Use RFC 1918 address space. Plan for growth — difficult to resize later without disruption.</li>
+<li>Subnets: Separate subnets for: web tier, app tier, data tier, management, gateway, bastion, private endpoints.</li>
+<li>VNet peering: Connect VNets within or across regions. Non-transitive — use hub-spoke topology with Azure Firewall or NVA for transit.</li>
+<li>Hub-spoke topology: Central hub VNet with shared services (firewall, DNS, VPN gateway). Spoke VNets peered to hub.</li>
+<li>DNS: Azure Private DNS zones for private name resolution. Link zones to VNets. Use for internal service discovery.</li>
+<li>Service endpoints: Route traffic to Azure PaaS services over the Azure backbone instead of public internet.</li>
+<li>Private endpoints: Private IP for PaaS services (Storage, SQL, Key Vault) inside your VNet. Preferred over service endpoints.</li>
+</ul>
+
+<h3>11.4 Network Security Groups (NSGs)</h3>
+<ul>
+<li>NSGs filter traffic at subnet or NIC level. Stateful — return traffic auto-allowed.</li>
+<li>Priority: Lower number = higher priority (100-4096). Default rules allow VNet-to-VNet and outbound internet.</li>
+<li>Best practices:
+  <ul>
+    <li>Apply NSGs to subnets, not individual NICs (easier to manage).</li>
+    <li>Use Application Security Groups (ASGs) to group VMs by role instead of IP addresses.</li>
+    <li>Deny all inbound as last rule (already default). Add specific allow rules above.</li>
+    <li>Never open RDP (3389) or SSH (22) to the internet. Use Azure Bastion or JIT VM access.</li>
+  </ul>
+</li>
+<li>NSG flow logs: Enable for traffic analysis. Send to Log Analytics workspace for queries and visualization.</li>
+<li>Network Watcher: IP flow verify, next hop, connection troubleshoot, packet capture, NSG diagnostics.</li>
+</ul>
+
+<h3>11.5 Azure Firewall</h3>
+<ul>
+<li>Azure Firewall: Cloud-native, managed firewall service. Deploy in hub VNet for centralized traffic control.</li>
+<li>SKUs: Basic (SMB, low throughput), Standard (threat intelligence, FQDN filtering, network/app rules), Premium (TLS inspection, IDPS, URL filtering, web categories).</li>
+<li>Rule collections: Network rules (L3/L4), Application rules (L7 FQDN-based), NAT rules (DNAT inbound).</li>
+<li>Firewall Policy: Use Firewall Policy instead of classic rules. Policies can be inherited (base → child) for multi-tier management.</li>
+<li>DNS proxy: Enable Azure Firewall as DNS proxy for VNets. Required for FQDN filtering in network rules.</li>
+<li>Forced tunneling: Route all internet-bound traffic through Azure Firewall. Requires management subnet and public IP.</li>
+<li>Threat intelligence: Block traffic from/to known malicious IPs and domains. Enable in "Alert and deny" mode.</li>
+</ul>
+
+<h3>11.6 VPN &amp; ExpressRoute</h3>
+<ul>
+<li>Site-to-Site VPN: Connect on-prem to Azure VNet. VPN Gateway required in gateway subnet (/27 minimum).</li>
+<li>Gateway SKUs: VpnGw1 (650 Mbps) for small, VpnGw2 (1 Gbps) for medium, VpnGw3-5 for larger. AZ SKUs for zone-redundant.</li>
+<li>Point-to-Site VPN: Remote user access to Azure VNet. Supports IKEv2, SSTP, OpenVPN. Certificate or Entra ID authentication.</li>
+<li>ExpressRoute: Private, dedicated connection to Azure via connectivity provider. 50 Mbps to 100 Gbps. For production workloads requiring guaranteed bandwidth and low latency.</li>
+<li>Coexistence: ExpressRoute + S2S VPN for failover. VPN as backup when ExpressRoute circuit is down.</li>
+<li>BGP: Enable BGP on VPN Gateway for dynamic routing with on-prem networks. ASN 65515 reserved for Azure.</li>
+</ul>
+
+<h3>11.7 Azure Storage</h3>
+<ul>
+<li>Storage account types: Standard (HDD-backed, cheapest), Premium (SSD, low latency). General Purpose v2 is the default.</li>
+<li>Services: Blob (object storage), File (SMB/NFS shares), Queue (messaging), Table (NoSQL key-value).</li>
+<li>Access tiers: Hot (frequent access), Cool (30+ day retention, lower storage cost), Cold (90+ day), Archive (180+ day, offline, hours to rehydrate).</li>
+<li>Redundancy: LRS (3 copies in one datacenter), ZRS (3 copies across zones), GRS (6 copies across regions), GZRS (ZRS + cross-region).</li>
+<li>Security:
+  <ul>
+    <li>Disable public blob access by default.</li>
+    <li>Use private endpoints for VNet access.</li>
+    <li>Require HTTPS (minimum TLS 1.2).</li>
+    <li>Use Entra ID authentication over shared keys where possible.</li>
+    <li>Enable soft delete for blobs (14-day minimum) and containers.</li>
+    <li>Immutable storage (WORM) for compliance data.</li>
+  </ul>
+</li>
+<li>Azure Files: SMB 3.0 file shares. Can replace on-prem file servers. Azure File Sync for hybrid caching.</li>
+</ul>
+
+<h3>11.8 Azure AD Domain Services (Entra Domain Services)</h3>
+<ul>
+<li>Managed AD DS in Azure. Provides domain join, LDAP, NTLM, Kerberos without deploying DCs.</li>
+<li>Use cases: Lift-and-shift apps requiring AD DS, LDAP-bound applications, legacy authentication needs.</li>
+<li>One-way sync from Entra ID → Entra DS. Changes in Entra ID propagate; no writeback.</li>
+<li>Managed domain: <code>aadds.company.com</code>. Separate from on-prem AD. Join Azure VMs to this domain.</li>
+<li>Limitations: No schema extensions, no custom OU structure at top level, no trust relationships in managed SKU (available in Enterprise SKU).</li>
+<li>SKUs: Standard (25k objects), Enterprise (100k objects + trusts), Premium (unlimited).</li>
+</ul>
+
+<h3>11.9 Cost Management</h3>
+<ul>
+<li>Azure Cost Management + Billing: Built-in cost analysis, budgets, alerts.</li>
+<li>Budgets: Set monthly budgets per subscription/resource group. Alert at 50%, 75%, 90%, 100%.</li>
+<li>Reserved Instances (RIs): 1-year or 3-year commitment. Save 40-72% on VMs, SQL, Cosmos DB.</li>
+<li>Savings Plans: Flexible compute commitment (applies to VMs, App Service, Functions). Better for variable workloads.</li>
+<li>Azure Advisor: Recommendations for right-sizing, shutting down unused resources, purchasing RIs.</li>
+<li>Auto-shutdown: Enable on dev/test VMs. Schedule via Azure Automation or VM auto-shutdown feature.</li>
+<li>Spot VMs: Up to 90% discount for interruptible workloads (batch processing, CI/CD, dev/test).</li>
+<li>Right-sizing: Review Azure Advisor recommendations monthly. Downsize over-provisioned VMs.</li>
+</ul>
+
+<h3>11.10 Azure Troubleshooting Essentials</h3>
+<pre><code># VM connectivity
+az network watcher test-ip-flow --direction Inbound --protocol TCP --local 10.0.0.4:3389 --remote 203.0.113.5:* --vm myVM --resource-group myRG
+az network watcher show-next-hop --vm myVM --resource-group myRG --source-ip 10.0.0.4 --dest-ip 10.1.0.4
+
+# Resource health
+az resource show --ids /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vm}
+az monitor activity-log list --resource-group myRG --offset 1h
+
+# Networking
+az network nic show-effective-route-table --resource-group myRG --name myNIC
+az network nic list-effective-nsg --resource-group myRG --name myNIC</code></pre>
+
+<hr>
+
+<h2 id="s12">SECTION 12 – MICROSOFT DEFENDER SUITE</h2>
+
+<h3>12.1 Defender Suite Overview</h3>
+<table>
+<tr><th>Product</th><th>Protects</th><th>License</th></tr>
+<tr><td>Defender for Endpoint (MDE)</td><td>Workstations, servers, mobile</td><td>M365 E5, E5 Security, MDE P1/P2, Business Premium</td></tr>
+<tr><td>Defender for Office 365 (MDO)</td><td>Email, collaboration</td><td>M365 E5, E5 Security, MDO P1/P2</td></tr>
+<tr><td>Defender for Identity (MDI)</td><td>Active Directory, identity threats</td><td>M365 E5, E5 Security, EMS E5</td></tr>
+<tr><td>Defender for Cloud Apps (MDCA)</td><td>SaaS apps, shadow IT</td><td>M365 E5, E5 Security, EMS E5</td></tr>
+<tr><td>Defender for Cloud</td><td>Azure, AWS, GCP workloads</td><td>Pay-per-resource (CSPM free, CWPP per plan)</td></tr>
+<tr><td>Microsoft Sentinel</td><td>SIEM + SOAR platform</td><td>Pay-per-GB ingested</td></tr>
+</table>
+
+<h3>12.2 Defender for Endpoint (MDE)</h3>
+<ul>
+<li>Onboarding methods: Intune (preferred), GPO, SCCM, local script, VDI scripts. For servers: Azure Arc + Defender for Servers.</li>
+<li>Attack Surface Reduction (ASR) rules: Block Office macro abuse, credential theft, untrusted processes, WMI abuse, ransomware behavior. Deploy in audit mode first.</li>
+<li>Endpoint Detection and Response (EDR): Real-time behavioral monitoring. Advanced hunting (KQL queries) for threat hunting.</li>
+<li>Automated Investigation and Remediation (AIR): Auto-investigates alerts, contains threats, remediates. Configure automation levels (Full, Semi, No automation).</li>
+<li>Device risk score: Integrates with Intune compliance and Conditional Access. High-risk device → blocked from M365.</li>
+<li>Network protection: Block connections to known-bad domains/IPs. Extends SmartScreen to all HTTP/HTTPS traffic.</li>
+<li>Controlled folder access: Ransomware protection — blocks untrusted apps from modifying protected folders.</li>
+<li>Tamper protection: Prevents disabling of Defender antivirus settings. Enable for all production endpoints.</li>
+<li>Web content filtering: Category-based web filtering without a full proxy. Applied via network protection.</li>
+</ul>
+
+<h4>12.2.1 MDE Advanced Hunting Examples</h4>
+<pre><code>// Find devices with known vulnerable software
+DeviceTvmSoftwareVulnerabilities
+| where VulnerabilitySeverityLevel == "Critical"
+| summarize count() by DeviceName, SoftwareName, CveId
+| order by count_ desc
+
+// Detect suspicious PowerShell execution
+DeviceProcessEvents
+| where FileName == "powershell.exe"
+| where ProcessCommandLine has_any ("-enc", "-encodedcommand", "bypass", "hidden", "downloadstring")
+| project Timestamp, DeviceName, AccountName, ProcessCommandLine
+
+// Find lateral movement attempts
+DeviceLogonEvents
+| where LogonType == "RemoteInteractive"
+| where ActionType == "LogonFailed"
+| summarize FailedAttempts=count() by RemoteIP, DeviceName, bin(Timestamp, 1h)
+| where FailedAttempts > 5</code></pre>
+
+<h3>12.3 Defender for Office 365 (MDO)</h3>
+<ul>
+<li>Safe Attachments: Detonates attachments in sandbox. Policies: Dynamic Delivery (delivers email immediately, attachment scanned in background), Replace (remove attachment), Block.</li>
+<li>Safe Links: Rewrites URLs for time-of-click protection. Enable for: email, Teams, Office apps. Disable "Do not track when users click" — tracking needed for investigations.</li>
+<li>Anti-phishing policies: Impersonation protection for specific users (C-suite, finance) and domains. Mailbox intelligence for pattern learning.</li>
+<li>Preset security policies: Standard (recommended baseline) and Strict (aggressive). Apply to all users as starting point.</li>
+<li>Attack simulation training: Phishing simulations to test and train users. Track click rates and reporting rates per department.</li>
+<li>Threat Explorer: Real-time view of email threats. Filter by malware, phish, campaigns. Remediate directly (soft delete, hard delete, move to junk).</li>
+<li>Automated investigation: Triggered by alerts. Reviews related emails, users, and indicators. Recommends or auto-remediates.</li>
+</ul>
+
+<h3>12.4 Defender for Identity (MDI)</h3>
+<ul>
+<li>Monitors Active Directory domain controllers for identity-based attacks.</li>
+<li>Sensor deployment: Install MDI sensor on all DCs and ADFS servers. Lightweight — captures network traffic and Windows events.</li>
+<li>Detections: Pass-the-hash, pass-the-ticket, golden ticket, DCSync, brute force, reconnaissance (DNS, LDAP, SMB enumeration).</li>
+<li>Lateral movement paths: Visualizes how an attacker could move from compromised account to sensitive targets.</li>
+<li>Honeytoken accounts: Create decoy accounts. MDI alerts on any authentication attempt against them.</li>
+<li>Security posture assessments: Identifies risky AD configurations (unsecured SID History, clear-text LDAP binds, legacy protocols).</li>
+<li>Integration: Alerts feed into Microsoft 365 Defender portal for unified incident correlation.</li>
+<li>Prerequisites: Port 443 outbound to MDI cloud service. Service account with read access to AD (or use GMSA for AD FS).</li>
+</ul>
+
+<h3>12.5 Defender for Cloud Apps (MDCA)</h3>
+<ul>
+<li>Cloud Access Security Broker (CASB). Provides visibility and control over SaaS usage.</li>
+<li>Cloud Discovery: Analyze firewall/proxy logs to discover shadow IT. Integrates with Defender for Endpoint for agent-based discovery.</li>
+<li>App connectors: Native API connectors for M365, Azure, Google Workspace, Salesforce, Box, Dropbox, etc.</li>
+<li>Session policies: Real-time monitoring and control. Block downloads from unmanaged devices, redact sensitive content, require step-up auth.</li>
+<li>Access policies: Conditional Access App Control (reverse proxy). Route sessions through MDCA for inspection.</li>
+<li>File policies: Scan files in connected apps for sensitive data. Auto-apply labels, quarantine, or notify.</li>
+<li>Anomaly detection: Impossible travel, mass download, unusual file deletion, suspicious inbox rules.</li>
+<li>App governance: Monitor and govern OAuth apps connected to your tenant. Detect over-privileged or inactive apps.</li>
+</ul>
+
+<h3>12.6 Microsoft Sentinel (SIEM + SOAR)</h3>
+<ul>
+<li>Cloud-native SIEM built on Log Analytics. Pay per GB ingested.</li>
+<li>Data connectors: M365 Defender, Entra ID, Azure Activity, Syslog, CEF, AWS CloudTrail, custom (REST API, Logstash, Azure Functions).</li>
+<li>Free data sources: Azure Activity logs, Office 365 audit logs (if using E5/A5/G5), Microsoft 365 Defender incidents.</li>
+<li>Analytics rules: Scheduled (KQL queries), NRT (near real-time), Microsoft Security (auto-create from other Defender products), Anomaly, Fusion (multi-stage attack detection).</li>
+<li>Workbooks: Pre-built dashboards for common scenarios (Azure Sign-ins, Office 365, DNS, Firewall). Customizable with KQL.</li>
+<li>Automation rules + Playbooks: SOAR capability. Playbooks use Logic Apps. Auto-close low-priority incidents, auto-block IPs, auto-isolate devices, send Teams notifications.</li>
+<li>Threat intelligence: Import IOCs (hashes, IPs, domains) via TAXII feed or TI connector. Match against ingested data.</li>
+<li>UEBA: User and Entity Behavior Analytics. Builds behavioral profiles, detects anomalies per user/host/IP.</li>
+</ul>
+
+<h4>12.6.1 Sentinel KQL Examples</h4>
+<pre><code>// Failed sign-ins from multiple countries in 24 hours
+SigninLogs
+| where ResultType != 0
+| summarize Countries=dcount(LocationDetails.countryOrRegion),
+            Attempts=count() by UserPrincipalName, bin(TimeGenerated, 24h)
+| where Countries > 3
+
+// Detect new inbox forwarding rules (BEC indicator)
+OfficeActivity
+| where Operation == "New-InboxRule"
+| where Parameters has_any ("ForwardTo", "RedirectTo", "ForwardAsAttachmentTo")
+| project TimeGenerated, UserId, Parameters
+
+// Brute force detection on Azure VMs
+Syslog
+| where Facility == "auth" and SyslogMessage has "Failed password"
+| summarize FailCount=count() by HostIP, bin(TimeGenerated, 1h)
+| where FailCount > 50</code></pre>
+
+<h3>12.7 Defender Incident Response Playbook</h3>
+<ol>
+<li><strong>Triage:</strong> Review incident in M365 Defender portal. Check severity, affected entities, alert sources.</li>
+<li><strong>Scope:</strong> Identify all compromised accounts, devices, and mailboxes. Use incident graph visualization.</li>
+<li><strong>Contain:</strong> Isolate affected devices (MDE device isolation). Disable compromised accounts. Block malicious indicators.</li>
+<li><strong>Investigate:</strong> Advanced hunting for IOCs across the environment. Check lateral movement. Review sign-in logs.</li>
+<li><strong>Remediate:</strong> Reset passwords. Revoke sessions (<code>Revoke-MgUserSignInSession</code>). Remove malware. Remediate email (soft/hard delete). Remove forwarding rules.</li>
+<li><strong>Recover:</strong> Re-enable accounts with MFA. Unblock devices. Monitor for recurrence.</li>
+<li><strong>Post-incident:</strong> Document timeline, root cause, lessons learned. Update CA policies, ASR rules, detection rules as needed.</li>
+</ol>
+
+<hr>
+
+<h2 id="s13">SECTION 13 – SHAREPOINT / TEAMS / ONEDRIVE</h2>
+
+<h3>13.1 SharePoint Online Architecture</h3>
+<ul>
+<li>SharePoint Online is the foundation for M365 collaboration: document management, intranet, and Teams file storage.</li>
+<li>Site types: Communication sites (intranet, announcements — no M365 group), Team sites (collaboration — backed by M365 group).</li>
+<li>Hub sites: Organize related sites under a common navigation and search scope. Up to 2000 hub associations per tenant.</li>
+<li>Storage: Tenant baseline = 1 TB + 10 GB per licensed user. Per-site storage quota configurable up to 25 TB.</li>
+<li>File limits: 15 GB max file size. 250,000 items per library (30 million per site collection). Path length max 400 characters.</li>
+<li>Versioning: Enable major versions (default: 500 limit). Minor versions for publishing sites only. Trim versions to control storage.</li>
+<li>Permissions model: Site → Library → Folder → Item. Avoid item-level permissions (breaks inheritance, hard to audit). Use groups.</li>
+</ul>
+
+<h3>13.2 SharePoint External Sharing</h3>
+<table>
+<tr><th>Level</th><th>Description</th><th>Recommended For</th></tr>
+<tr><td>Anyone (anonymous)</td><td>No sign-in required. Link-based access.</td><td>Never for sensitive data</td></tr>
+<tr><td>New and existing guests</td><td>Guests must sign in (Entra B2B invite).</td><td>Default for most orgs</td></tr>
+<tr><td>Existing guests only</td><td>Only pre-invited guests can access.</td><td>Tighter control environments</td></tr>
+<tr><td>Only people in your org</td><td>External sharing completely disabled.</td><td>Highly regulated industries</td></tr>
+</table>
+<ul>
+<li>Configure sharing at tenant level (SharePoint admin center) and per-site. Site-level cannot exceed tenant-level.</li>
+<li>Expiration: Set link expiration for Anyone links (recommended: 7-30 days). Guest access reviews via Entra ID.</li>
+<li>Domain restrictions: Allow/block specific email domains for sharing.</li>
+</ul>
+
+<h3>13.3 OneDrive for Business</h3>
+<ul>
+<li>Storage: 1 TB per user (default). Increase to 5 TB via SharePoint admin center. Unlimited for E3+ (request from Microsoft).</li>
+<li>Sync client: OneDrive sync app (Files On-Demand). Configure Known Folder Move (KFM) via GPO or Intune to redirect Desktop, Documents, Pictures to OneDrive.</li>
+<li>KFM deployment:
+<pre><code>; Intune Settings Catalog or GPO:
+; Silently move Windows known folders to OneDrive = Enabled
+; Tenant ID = your-tenant-id
+; Prevent users from redirecting their Windows known folders to their PC = Enabled</code></pre>
+</li>
+<li>Retention: When a user is deleted, their OneDrive is retained for 30 days (default, configurable up to 3650 days). Manager gets delegated access.</li>
+<li>Data loss prevention: OneDrive files scanned by DLP policies. Sensitive files can be blocked from sharing.</li>
+<li>Sync restrictions: Block sync on unmanaged devices. Restrict sync to specific domains via Intune or GPO.</li>
+</ul>
+
+<h3>13.4 Microsoft Teams Administration</h3>
+<ul>
+<li>Teams admin center: <code>admin.teams.microsoft.com</code>. Manages policies for messaging, meetings, calling, apps, and devices.</li>
+<li>Team creation: Control who can create Teams/M365 Groups via Entra ID group-based policy. Prevent team sprawl.</li>
+<li>Naming policy: Enforce prefixes/suffixes on group names (e.g., <code>Team-{GroupName}-{Department}</code>). Configure in Entra ID.</li>
+<li>Expiration policy: Auto-expire unused Teams/Groups after 90-365 days. Owners notified before expiry. Renew or auto-delete.</li>
+<li>Guest access: Enable/disable per-org. Control what guests can do (create channels, delete messages, share files). Configure in Teams admin center + Entra ID external collaboration settings.</li>
+<li>App policies: Control which third-party and custom apps users can install. Block by default, allow specific apps.</li>
+</ul>
+
+<h4>13.4.1 Teams Meeting Policies</h4>
+<ul>
+<li>Audio/Video: Control who can use camera, mic, screen sharing, recording.</li>
+<li>Recording: Auto-record all meetings or per-policy. Recordings stored in OneDrive/SharePoint (replacing Stream Classic).</li>
+<li>Transcription: Enable live transcription and meeting recap (Copilot-powered with M365 Copilot license).</li>
+<li>Lobby: Configure who bypasses lobby — org users only (recommended). External and anonymous always wait.</li>
+<li>Meeting chat: Allow during and after meeting. Set retention as needed.</li>
+<li>Watermarks: Enable for sensitive meetings — displays participant email on shared content and video feeds.</li>
+<li>End-to-end encryption (E2EE): Available for 1:1 calls. Enable per-policy for users handling sensitive communications.</li>
+</ul>
+
+<h3>13.5 Teams Phone System (Voice)</h3>
+<ul>
+<li>Teams Phone: Cloud PBX system replacing on-prem phone systems. Requires Teams Phone license (included in E5).</li>
+<li>PSTN connectivity options:
+  <ul>
+    <li><strong>Microsoft Calling Plans</strong>: Microsoft provides phone numbers and PSTN connectivity. Simplest. Per-user/month license.</li>
+    <li><strong>Operator Connect</strong>: PSTN via certified telecom operator. Numbers managed in Teams admin center. Middle ground.</li>
+    <li><strong>Direct Routing</strong>: Connect your own SBC (Session Border Controller) to Teams. Full control. Requires SBC hardware/software + SIP trunk.</li>
+  </ul>
+</li>
+<li>Auto attendants: Automated call routing menus. Configure business hours, greeting, menu options, call routing.</li>
+<li>Call queues: Distribute incoming calls to a group of agents. Overflow, timeout, and opt-out settings.</li>
+<li>Voicemail: Cloud voicemail (Exchange-backed). Transcription enabled by default. PIN-based access for external retrieval.</li>
+<li>Emergency calling: Configure emergency addresses per user/site. Dynamic emergency calling for remote users (requires E911 provider).</li>
+<li>Call quality dashboard (CQD): Analyze call quality metrics (jitter, packet loss, latency). Build reports per subnet/building/location.</li>
+</ul>
+
+<h3>13.6 Teams Troubleshooting</h3>
+<ol>
+<li>Call quality: Check CQD reports. Network Assessment Tool to validate network readiness. Minimum: &lt;100ms latency, &lt;1% packet loss, &lt;30ms jitter.</li>
+<li>Sign-in issues: Clear Teams cache: <code>%AppData%\Microsoft\Teams</code> (classic) or reset via Settings (new Teams). Check proxy/firewall allowing Teams endpoints.</li>
+<li>Teams endpoints: Allow URLs and IPs per Microsoft 365 URLs/IP addresses documentation (ID 11, 12, 13 are critical for Teams).</li>
+<li>Federation issues: Check external access settings in Teams admin center. Verify both orgs allow federation.</li>
+<li>File access issues: Teams files stored in SharePoint. Check SharePoint permissions for the channel's document library.</li>
+<li>Device issues: Teams admin center → Teams devices. Monitor health, update firmware, remote restart.</li>
+</ol>
+
+<hr>
+
+<h2 id="s14">SECTION 14 – POWERSHELL &amp; AUTOMATION</h2>
+
+<h3>14.1 PowerShell Module Reference</h3>
+<table>
+<tr><th>Module</th><th>Install Command</th><th>Use Case</th></tr>
+<tr><td>Microsoft.Graph</td><td><code>Install-Module Microsoft.Graph</code></td><td>Entra ID, users, groups, Intune, mail (replaces AzureAD and MSOnline)</td></tr>
+<tr><td>ExchangeOnlineManagement</td><td><code>Install-Module ExchangeOnlineManagement</code></td><td>Exchange Online mailboxes, transport, anti-spam</td></tr>
+<tr><td>Az</td><td><code>Install-Module Az</code></td><td>Azure resource management (VMs, VNets, storage)</td></tr>
+<tr><td>Microsoft.Online.SharePoint.PowerShell</td><td><code>Install-Module Microsoft.Online.SharePoint.PowerShell</code></td><td>SharePoint Online admin</td></tr>
+<tr><td>MicrosoftTeams</td><td><code>Install-Module MicrosoftTeams</code></td><td>Teams policies, users, configuration</td></tr>
+<tr><td>PnP.PowerShell</td><td><code>Install-Module PnP.PowerShell</code></td><td>SharePoint site management, provisioning, content</td></tr>
+</table>
+
+<div class="callout-warn callout">
+<strong>Important:</strong> AzureAD and MSOnline modules are deprecated (retired March 2025). Migrate all scripts to Microsoft.Graph. Use <code>Find-MgGraphCommand -Command Get-AzureADUser</code> to find Graph equivalents.
+</div>
+
+<h3>14.2 Authentication &amp; Connection Patterns</h3>
+<pre><code># Microsoft Graph (interactive)
+Connect-MgGraph -Scopes "User.Read.All","Group.ReadWrite.All","Mail.Read"
+
+# Microsoft Graph (app registration — automated scripts)
+$cert = Get-Item Cert:\CurrentUser\My\{thumbprint}
+Connect-MgGraph -ClientId {app-id} -TenantId {tenant-id} -Certificate $cert
+
+# Exchange Online
+Connect-ExchangeOnline -UserPrincipalName admin@domain.com
+
+# Azure
+Connect-AzAccount
+Set-AzContext -SubscriptionId {sub-id}
+
+# SharePoint Online
+Connect-SPOService -Url https://tenant-admin.sharepoint.com
+
+# Teams
+Connect-MicrosoftTeams
+
+# PnP SharePoint (supports certificate auth for automation)
+Connect-PnPOnline -Url https://tenant.sharepoint.com/sites/MySite -Interactive</code></pre>
+
+<h3>14.3 Common MSP Automation Scripts</h3>
+
+<h4>14.3.1 User Onboarding</h4>
+<pre><code># Create user with license assignment
+$PasswordProfile = @{
+    Password = (New-Guid).ToString() + "!Aa1"
+    ForceChangePasswordNextSignIn = $true
+}
+
+New-MgUser -DisplayName "Jane Doe" `
+    -UserPrincipalName "jdoe@domain.com" `
+    -MailNickname "jdoe" `
+    -PasswordProfile $PasswordProfile `
+    -AccountEnabled `
+    -UsageLocation "US" `
+    -Department "Engineering" `
+    -JobTitle "Engineer"
+
+# Assign M365 Business Premium license
+$License = @{
+    AddLicenses = @(@{SkuId = (Get-MgSubscribedSku | Where SkuPartNumber -eq "SPB").SkuId})
+    RemoveLicenses = @()
+}
+Set-MgUserLicense -UserId "jdoe@domain.com" -BodyParameter $License
+
+# Add to groups
+Add-MgGroupMember -GroupId {group-id} -DirectoryObjectId (Get-MgUser -UserId "jdoe@domain.com").Id</code></pre>
+
+<h4>14.3.2 User Offboarding</h4>
+<pre><code># Block sign-in
+Update-MgUser -UserId "jdoe@domain.com" -AccountEnabled:$false
+
+# Revoke all sessions
+Revoke-MgUserSignInSession -UserId "jdoe@domain.com"
+
+# Convert to shared mailbox (preserve email access)
+Set-Mailbox -Identity "jdoe@domain.com" -Type Shared
+
+# Set out-of-office
+Set-MailboxAutoReplyConfiguration -Identity "jdoe@domain.com" `
+    -AutoReplyState Enabled `
+    -ExternalMessage "This person is no longer with the company. Please contact info@domain.com." `
+    -InternalMessage "This person is no longer with the company. Please contact info@domain.com."
+
+# Remove from all groups
+$groups = Get-MgUserMemberOf -UserId "jdoe@domain.com"
+foreach ($group in $groups) {
+    Remove-MgGroupMember -GroupId $group.Id -DirectoryObjectId (Get-MgUser -UserId "jdoe@domain.com").Id -ErrorAction SilentlyContinue
+}
+
+# Forward email to manager
+Set-Mailbox -Identity "jdoe@domain.com" -ForwardingSmtpAddress "manager@domain.com"
+
+# Remove license (after converting to shared mailbox)
+$License = @{
+    AddLicenses = @()
+    RemoveLicenses = @((Get-MgUserLicenseDetail -UserId "jdoe@domain.com").SkuId)
+}
+Set-MgUserLicense -UserId "jdoe@domain.com" -BodyParameter $License</code></pre>
+
+<h4>14.3.3 Bulk Operations</h4>
+<pre><code># Bulk password reset from CSV
+Import-Csv "C:\users.csv" | ForEach-Object {
+    $newPassword = @{
+        Password = (New-Guid).ToString().Substring(0,12) + "!Aa1"
+        ForceChangePasswordNextSignIn = $true
+    }
+    Update-MgUser -UserId $_.UserPrincipalName -PasswordProfile $newPassword
+    Write-Output "$($_.UserPrincipalName): Password reset"
+}
+
+# Export all licensed users with assigned licenses
+Get-MgUser -All -Property DisplayName, UserPrincipalName, AssignedLicenses |
+    Where-Object { $_.AssignedLicenses.Count -gt 0 } |
+    Select-Object DisplayName, UserPrincipalName,
+        @{N='Licenses';E={($_.AssignedLicenses | ForEach-Object {
+            (Get-MgSubscribedSku | Where SkuId -eq $_.SkuId).SkuPartNumber
+        }) -join ', '}} |
+    Export-Csv "C:\LicenseReport.csv" -NoTypeInformation
+
+# Bulk enable litigation hold
+Get-Mailbox -ResultSize Unlimited -RecipientTypeDetails UserMailbox |
+    Set-Mailbox -LitigationHoldEnabled $true -LitigationHoldDuration 365</code></pre>
+
+<h4>14.3.4 Security &amp; Compliance Reporting</h4>
+<pre><code># MFA registration status (Graph)
+Get-MgReportAuthenticationMethodUserRegistrationDetail -All |
+    Select-Object UserPrincipalName, MethodsRegistered, IsMfaCapable, IsMfaRegistered |
+    Export-Csv "C:\MFAStatus.csv" -NoTypeInformation
+
+# Stale devices (no sign-in for 90+ days)
+$staleDate = (Get-Date).AddDays(-90)
+Get-MgDevice -All -Property DisplayName, ApproximateLastSignInDateTime, OperatingSystem |
+    Where-Object { $_.ApproximateLastSignInDateTime -lt $staleDate } |
+    Select-Object DisplayName, OperatingSystem, ApproximateLastSignInDateTime |
+    Export-Csv "C:\StaleDevices.csv" -NoTypeInformation
+
+# Mailbox forwarding audit
+Get-Mailbox -ResultSize Unlimited |
+    Where-Object { $_.ForwardingSmtpAddress -ne $null -or $_.ForwardingAddress -ne $null } |
+    Select-Object DisplayName, PrimarySmtpAddress, ForwardingSmtpAddress, ForwardingAddress |
+    Export-Csv "C:\ForwardingRules.csv" -NoTypeInformation
+
+# Inbox rules forwarding externally
+Get-Mailbox -ResultSize Unlimited | ForEach-Object {
+    Get-InboxRule -Mailbox $_.PrimarySmtpAddress -ErrorAction SilentlyContinue |
+        Where-Object { $_.ForwardTo -or $_.ForwardAsAttachmentTo -or $_.RedirectTo } |
+        Select-Object @{N='Mailbox';E={$_.MailboxOwnerId}}, Name, ForwardTo, RedirectTo
+} | Export-Csv "C:\InboxRuleForwarding.csv" -NoTypeInformation</code></pre>
+
+<h3>14.4 Microsoft Graph API</h3>
+<ul>
+<li>Graph API is the unified REST endpoint for all Microsoft 365 data: <code>https://graph.microsoft.com/v1.0/</code>.</li>
+<li>Beta endpoint (<code>/beta/</code>): Newer features, subject to change. Do not use in production scripts.</li>
+<li>Permission types:
+  <ul>
+    <li><strong>Delegated</strong>: Act on behalf of a signed-in user. For interactive scripts.</li>
+    <li><strong>Application</strong>: Act without a user. For automated/daemon scripts. Requires admin consent.</li>
+  </ul>
+</li>
+<li>Least privilege: Request only needed permissions. <code>User.Read.All</code> instead of <code>Directory.Read.All</code> if you only need users.</li>
+<li>Pagination: API returns max 100-999 items per page. Always handle <code>@odata.nextLink</code> for complete results.</li>
+<li>Batching: Combine up to 20 requests in a single batch call (<code>$batch</code> endpoint). Reduces HTTP overhead.</li>
+<li>Change notifications (webhooks): Subscribe to resource changes (new email, calendar event, user created). Requires HTTPS endpoint.</li>
+<li>Graph Explorer: <code>developer.microsoft.com/en-us/graph/graph-explorer</code> — test queries interactively before coding.</li>
+</ul>
+
+<h4>14.4.1 Graph API Quick Reference</h4>
+<table>
+<tr><th>Operation</th><th>Endpoint</th><th>Method</th></tr>
+<tr><td>List users</td><td><code>/users</code></td><td>GET</td></tr>
+<tr><td>Get user</td><td><code>/users/{id}</code></td><td>GET</td></tr>
+<tr><td>Create user</td><td><code>/users</code></td><td>POST</td></tr>
+<tr><td>List groups</td><td><code>/groups</code></td><td>GET</td></tr>
+<tr><td>Group members</td><td><code>/groups/{id}/members</code></td><td>GET</td></tr>
+<tr><td>Send mail</td><td><code>/users/{id}/sendMail</code></td><td>POST</td></tr>
+<tr><td>List messages</td><td><code>/users/{id}/messages</code></td><td>GET</td></tr>
+<tr><td>List managed devices</td><td><code>/deviceManagement/managedDevices</code></td><td>GET</td></tr>
+<tr><td>Sign-in logs</td><td><code>/auditLogs/signIns</code></td><td>GET</td></tr>
+<tr><td>Service health</td><td><code>/admin/serviceAnnouncement/healthOverviews</code></td><td>GET</td></tr>
+</table>
+
+<h3>14.5 Azure CLI Quick Reference</h3>
+<pre><code># Login
+az login
+az account set --subscription "My Subscription"
+
+# VM operations
+az vm list --output table
+az vm start --resource-group myRG --name myVM
+az vm stop --resource-group myRG --name myVM --no-wait
+az vm deallocate --resource-group myRG --name myVM
+az vm resize --resource-group myRG --name myVM --size Standard_D4s_v5
+
+# Networking
+az network vnet list --output table
+az network nsg rule list --resource-group myRG --nsg-name myNSG --output table
+az network public-ip list --output table
+
+# Storage
+az storage account list --output table
+az storage blob list --account-name myStorage --container-name myContainer --output table
+
+# Resource management
+az resource list --resource-group myRG --output table
+az tag list --resource-id {resource-id}
+az monitor activity-log list --resource-group myRG --offset 24h --output table</code></pre>
+
+<h3>14.6 Scheduled Automation Patterns</h3>
+<ul>
+<li><strong>Azure Automation</strong>: Run PowerShell/Python runbooks on schedule. Use Managed Identity for authentication. Free tier: 500 minutes/month.</li>
+<li><strong>Azure Functions</strong>: Event-driven serverless. Timer trigger for scheduled tasks. Consumption plan: pay-per-execution.</li>
+<li><strong>Power Automate</strong>: Low-code automation for M365 workflows. Scheduled flows, trigger on events (new email, file upload, form submission).</li>
+<li><strong>Windows Task Scheduler</strong>: On-prem automation. Run as service account with minimum permissions. Log output for auditing.</li>
+<li>Best practices:
+  <ul>
+    <li>Use certificate-based authentication (never store passwords in scripts).</li>
+    <li>Store secrets in Azure Key Vault, not in code or config files.</li>
+    <li>Log all automated actions to a centralized location.</li>
+    <li>Alert on script failures (email, Teams webhook, Sentinel alert).</li>
+    <li>Version control all automation scripts in Git.</li>
+  </ul>
+</li>
+</ul>
+
+<h3>14.7 Common MSP Automation Failure Patterns</h3>
+<ul>
+<li>Expired app registration secrets/certificates — scripts stop working silently. Monitor expiry dates.</li>
+<li>Module version conflicts — pin module versions in automated environments. Use <code>Install-Module -RequiredVersion</code>.</li>
+<li>API throttling (429 errors) — implement exponential backoff and retry logic. Graph API limits: 10,000 requests per 10 minutes per app.</li>
+<li>Pagination not handled — script returns only first page of results. Always follow <code>@odata.nextLink</code>.</li>
+<li>Running Exchange cmdlets in Azure Automation — requires <code>Connect-ExchangeOnline -ManagedIdentity -Organization tenant.onmicrosoft.com</code>.</li>
+<li>Insufficient Graph permissions — script fails silently or returns empty results. Check <code>Get-MgContext</code> for current scopes.</li>
+</ul>
+
+<hr>
+
 <p><strong>End of Master Reference Document</strong></p>
+<p><em>Last updated: March 2026</em></p>
 
 </body>
 </html>
