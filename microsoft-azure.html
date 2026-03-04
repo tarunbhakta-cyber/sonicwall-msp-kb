@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Microsoft L3 Reference – Azure Infrastructure</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Microsoft L3 Support – Azure Infrastructure</h1>
+<p><strong>Scope:</strong> Azure VMs, Networking, Storage, Backup, Azure AD, Site Recovery, Azure Firewall, VPN Gateway</p>
+
+<hr>
+
+<h2>SECTION 1 – AZURE VIRTUAL MACHINES</h2>
+
+<h3>1.1 VM Troubleshooting</h3>
+<pre>
+# Check VM status
+az vm get-instance-view --resource-group RG01 --name VM01 --query instanceView.statuses
+
+# Serial console (when RDP/SSH fails)
+# Azure Portal > VM > Help > Serial Console
+
+# Boot diagnostics
+az vm boot-diagnostics get-boot-log --resource-group RG01 --name VM01
+
+# Redeploy VM (moves to new host)
+az vm redeploy --resource-group RG01 --name VM01
+
+# Reset RDP access
+az vm user reset --resource-group RG01 --name VM01 --username adminuser --password NewP@ssw0rd
+
+# Run command remotely
+az vm run-command invoke --resource-group RG01 --name VM01 --command-id RunPowerShellScript --scripts "Get-Service"
+</pre>
+
+<h3>1.2 VM Sizing Quick Reference</h3>
+<table border="1">
+<tr><th>Series</th><th>Use Case</th><th>Notes</th></tr>
+<tr><td>B-series</td><td>Dev/test, low traffic</td><td>Burstable, cheapest</td></tr>
+<tr><td>D-series</td><td>General purpose</td><td>Balanced CPU/memory</td></tr>
+<tr><td>E-series</td><td>Memory-intensive</td><td>SQL Server, SAP</td></tr>
+<tr><td>F-series</td><td>Compute-intensive</td><td>High CPU:memory ratio</td></tr>
+<tr><td>L-series</td><td>Storage-intensive</td><td>High disk throughput</td></tr>
+<tr><td>N-series</td><td>GPU workloads</td><td>AI/ML, rendering</td></tr>
+</table>
+
+<h3>1.3 Common VM Issues</h3>
+<ul>
+<li><strong>VM stuck "Starting":</strong> Check allocation failures (resize or move to different region)</li>
+<li><strong>RDP timeout:</strong> Check NSG rules (port 3389), Windows Firewall, NIC effective security rules</li>
+<li><strong>High disk latency:</strong> Check disk type (Standard HDD vs Premium SSD), IOPS limits, disk caching</li>
+<li><strong>VM not booting:</strong> Check boot diagnostics screenshot, serial console, repair VM using OS disk swap</li>
+<li><strong>Unexpected reboot:</strong> Check Azure Service Health, VM availability logs, planned maintenance</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 2 – AZURE NETWORKING</h2>
+
+<h3>2.1 VNet Architecture</h3>
+<ul>
+<li>Hub-spoke topology recommended for multi-VNet designs</li>
+<li>Address spaces must NOT overlap between peered VNets or VPN-connected networks</li>
+<li>Subnets: GatewaySubnet (/27 minimum), AzureFirewallSubnet (/26), AzureBastionSubnet (/26)</li>
+<li>NSGs applied at subnet level (recommended) or NIC level</li>
+<li>UDRs (Route Tables) for forced tunneling or NVA routing</li>
+</ul>
+
+<h3>2.2 Network Security Groups (NSG)</h3>
+<pre>
+# Check effective NSG rules
+az network nic show-effective-nsg --resource-group RG01 --name VM01-NIC
+
+# Check NSG flow logs
+az network watcher flow-log show --resource-group NetworkWatcherRG --watcher-name NetworkWatcher --name NSGFlowLog
+
+# Common NSG troubleshooting
+# Azure Portal > VM > Networking > Effective security rules
+# Use IP flow verify: Network Watcher > IP flow verify
+</pre>
+
+<h3>2.3 Azure VPN Gateway</h3>
+<pre>
+# Check gateway status
+az network vnet-gateway show --resource-group RG01 --name VPNGateway01
+
+# Check connections
+az network vpn-connection show --resource-group RG01 --name S2S-Connection
+
+# Reset gateway
+az network vnet-gateway reset --resource-group RG01 --name VPNGateway01
+
+# Check BGP routes (if using BGP)
+az network vnet-gateway list-bgp-peer-status --resource-group RG01 --name VPNGateway01
+</pre>
+
+<h3>2.4 VPN Gateway SKU Reference</h3>
+<table border="1">
+<tr><th>SKU</th><th>S2S Tunnels</th><th>Throughput</th><th>BGP</th></tr>
+<tr><td>VpnGw1</td><td>30</td><td>650 Mbps</td><td>Yes</td></tr>
+<tr><td>VpnGw2</td><td>30</td><td>1 Gbps</td><td>Yes</td></tr>
+<tr><td>VpnGw3</td><td>30</td><td>1.25 Gbps</td><td>Yes</td></tr>
+<tr><td>VpnGw1AZ</td><td>30</td><td>650 Mbps</td><td>Yes (zone-redundant)</td></tr>
+</table>
+
+<h3>2.5 Site-to-Site VPN Troubleshooting</h3>
+<ul>
+<li><strong>Phase 1 (IKE) failure:</strong> Check pre-shared key match, IKE version, encryption/hash mismatch</li>
+<li><strong>Phase 2 (IPsec) failure:</strong> Check traffic selectors, PFS setting, SA lifetime mismatch</li>
+<li><strong>Tunnel up but no traffic:</strong> Check UDRs, NSGs, on-prem firewall rules, address space in local network gateway</li>
+<li><strong>Intermittent drops:</strong> Check DPD (Dead Peer Detection) settings, MTU/fragmentation, ISP stability</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 3 – AZURE STORAGE</h2>
+
+<h3>3.1 Storage Account Types</h3>
+<table border="1">
+<tr><th>Type</th><th>Use Case</th><th>Redundancy Options</th></tr>
+<tr><td>Standard GPv2</td><td>Blobs, files, queues, tables</td><td>LRS, ZRS, GRS, RA-GRS</td></tr>
+<tr><td>Premium Block Blob</td><td>High transaction workloads</td><td>LRS, ZRS</td></tr>
+<tr><td>Premium File Shares</td><td>Enterprise file shares</td><td>LRS, ZRS</td></tr>
+<tr><td>Premium Page Blob</td><td>Unmanaged VM disks</td><td>LRS</td></tr>
+</table>
+
+<h3>3.2 Azure Files / File Sync</h3>
+<pre>
+# Check Azure File Sync status
+Get-AzStorageSyncServerEndpoint -ResourceGroupName RG01 -StorageSyncServiceName SyncService01 -SyncGroupName SyncGroup01
+
+# Common issues:
+# - Tiered files not recalling: Check cloud tiering policy, free disk space
+# - Sync failing: Check FileSyncErrorsReport.ps1, agent version, firewall (port 443 to *.afs.azure.net)
+# - Server endpoint stuck provisioning: Restart Storage Sync Agent service
+</pre>
+
+<hr>
+
+<h2>SECTION 4 – AZURE BACKUP</h2>
+
+<h3>4.1 Backup Troubleshooting</h3>
+<pre>
+# Check backup job status
+az backup job list --resource-group RG01 --vault-name RSV01 --query "[?status=='Failed']"
+
+# Check protected items
+az backup item list --resource-group RG01 --vault-name RSV01
+
+# Trigger on-demand backup
+az backup protection backup-now --resource-group RG01 --vault-name RSV01 --container-name VM01 --item-name VM01
+</pre>
+
+<h3>4.2 Common Backup Issues</h3>
+<ul>
+<li><strong>VSS snapshot failure:</strong> Check VSS writers: <code>vssadmin list writers</code>, restart failed writers</li>
+<li><strong>Agent not responding:</strong> Check MARS agent service, network to *.backup.windowsazure.com (443)</li>
+<li><strong>VM backup failing:</strong> Check VM agent status, snapshot extension, disk lock</li>
+<li><strong>Restore point consistency:</strong> Application-consistent requires VSS; crash-consistent if VSS fails</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 5 – AZURE SITE RECOVERY (ASR)</h2>
+
+<h3>5.1 ASR Health Check</h3>
+<pre>
+# Check replication health
+az site-recovery replication-protected-item list --resource-group RG01 --vault-name RSV01 --fabric-name primary --protection-container-name pcprimary
+
+# Check RPO
+# Azure Portal > Recovery Services Vault > Replicated Items > RPO column
+# RPO > 30 min = investigate network/disk throughput
+
+# Failover test (ALWAYS test monthly)
+# Portal > Replicated item > Test Failover > Select recovery point > Select target VNet
+</pre>
+
+<h3>5.2 ASR Common Issues</h3>
+<ul>
+<li><strong>Initial replication stuck:</strong> Check mobility service agent, port 9443 (process server), disk throughput</li>
+<li><strong>RPO breach:</strong> Check source VM disk I/O, network bandwidth to Azure, process server health</li>
+<li><strong>Failover failed:</strong> Check target resource availability, NSG rules, storage account access</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 6 – AZURE MONITOR & LOG ANALYTICS</h2>
+
+<h3>6.1 Key Monitoring Queries (KQL)</h3>
+<pre>
+// VM CPU spikes last 24h
+Perf
+| where ObjectName == "Processor" and CounterName == "% Processor Time"
+| where TimeGenerated > ago(24h)
+| summarize avg(CounterValue) by Computer, bin(TimeGenerated, 5m)
+| where avg_CounterValue > 80
+
+// Failed sign-ins
+SigninLogs
+| where ResultType != "0"
+| summarize count() by UserPrincipalName, ResultDescription, AppDisplayName
+| order by count_ desc
+
+// Disk space alerts
+Perf
+| where ObjectName == "LogicalDisk" and CounterName == "% Free Space"
+| where CounterValue < 10
+| summarize arg_min(TimeGenerated, CounterValue) by Computer, InstanceName
+</pre>
+
+<h3>6.2 Alert Best Practices</h3>
+<ul>
+<li>CPU sustained >85% for 15 min = Warning</li>
+<li>Available memory &lt;10% for 10 min = Critical</li>
+<li>Disk free &lt;15% = Warning, &lt;5% = Critical</li>
+<li>VM heartbeat missing for 5 min = Critical</li>
+<li>Backup job failed = Critical (immediate notification)</li>
+</ul>
+
+</body>
+</html>

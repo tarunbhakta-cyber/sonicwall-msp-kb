@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Microsoft L3 Reference – Active Directory & Identity</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Microsoft L3 Support – Active Directory & Identity</h1>
+<p><strong>Scope:</strong> AD DS, Azure AD / Entra ID, ADFS, Group Policy, Hybrid Identity, Certificate Services</p>
+
+<hr>
+
+<h2>SECTION 1 – ACTIVE DIRECTORY DOMAIN SERVICES (AD DS)</h2>
+
+<h3>1.1 Domain Controller Health Validation</h3>
+<pre>
+# Comprehensive DC health check
+dcdiag /v /c /d /e /s:DC01
+repadmin /replsummary
+repadmin /showrepl
+repadmin /queue
+nltest /dsgetdc:domain.local
+nltest /sc_verify:domain.local
+
+# FSMO role holders
+netdom query fsmo
+
+# AD database integrity
+ntdsutil
+  activate instance ntds
+  files
+  integrity
+  quit
+  quit
+</pre>
+
+<h3>1.2 Replication Troubleshooting</h3>
+<ul>
+<li>Check replication status: <code>repadmin /replsummary</code></li>
+<li>Force replication: <code>repadmin /syncall /AdeP</code></li>
+<li>Check USN rollback: Event ID 2095 in Directory Services log</li>
+<li>Lingering objects: <code>repadmin /removelingeringobjects</code></li>
+<li>Check replication metadata: <code>repadmin /showobjmeta DC01 "DN"</code></li>
+</ul>
+
+<h3>1.3 Common Replication Errors</h3>
+<table border="1">
+<tr><th>Error</th><th>Cause</th><th>Fix</th></tr>
+<tr><td>8453</td><td>Replication access denied</td><td>Reset machine account, check DNS, verify SPN</td></tr>
+<tr><td>8524</td><td>DNS lookup failure</td><td>Fix DNS records, restart Netlogon</td></tr>
+<tr><td>1256</td><td>Remote system not available</td><td>Check network, firewall ports (135, 389, 445, 49152-65535)</td></tr>
+<tr><td>1722</td><td>RPC server unavailable</td><td>Check RPC service, firewall, network path</td></tr>
+<tr><td>8606</td><td>Insufficient attributes for object creation</td><td>Check schema consistency</td></tr>
+</table>
+
+<h3>1.4 AD DS Required Ports</h3>
+<table border="1">
+<tr><th>Port</th><th>Protocol</th><th>Service</th></tr>
+<tr><td>53</td><td>TCP/UDP</td><td>DNS</td></tr>
+<tr><td>88</td><td>TCP/UDP</td><td>Kerberos</td></tr>
+<tr><td>135</td><td>TCP</td><td>RPC Endpoint Mapper</td></tr>
+<tr><td>137-139</td><td>TCP/UDP</td><td>NetBIOS</td></tr>
+<tr><td>389</td><td>TCP/UDP</td><td>LDAP</td></tr>
+<tr><td>445</td><td>TCP</td><td>SMB</td></tr>
+<tr><td>464</td><td>TCP/UDP</td><td>Kerberos Password Change</td></tr>
+<tr><td>636</td><td>TCP</td><td>LDAPS</td></tr>
+<tr><td>3268</td><td>TCP</td><td>Global Catalog</td></tr>
+<tr><td>3269</td><td>TCP</td><td>Global Catalog SSL</td></tr>
+<tr><td>49152-65535</td><td>TCP</td><td>Dynamic RPC</td></tr>
+</table>
+
+<h3>1.5 Kerberos Troubleshooting</h3>
+<pre>
+# Check Kerberos tickets
+klist
+klist purge
+
+# Check time skew (max 5 min tolerance)
+w32tm /query /status
+w32tm /resync /force
+
+# Check SPN registration
+setspn -L computername
+setspn -X  # find duplicate SPNs
+
+# Kerberos event logging
+# Enable via GPO: Computer Config > Policies > Windows Settings > Security > Advanced Audit > Account Logon
+</pre>
+
+<h3>1.6 NTDS Database Maintenance</h3>
+<pre>
+# Offline defrag (requires DSRM boot)
+ntdsutil
+  activate instance ntds
+  files
+  compact to C:\temp
+  quit
+  quit
+# Then copy compacted ntds.dit back and delete old logs
+
+# Authoritative restore
+ntdsutil
+  activate instance ntds
+  authoritative restore
+  restore object "CN=user,OU=Users,DC=domain,DC=local"
+  quit
+  quit
+</pre>
+
+<hr>
+
+<h2>SECTION 2 – GROUP POLICY</h2>
+
+<h3>2.1 GPO Processing Order</h3>
+<ol>
+<li>Local Policy</li>
+<li>Site</li>
+<li>Domain</li>
+<li>OU (parent to child)</li>
+</ol>
+<p>Last applied wins. Enforced GPOs override Block Inheritance.</p>
+
+<h3>2.2 GPO Troubleshooting</h3>
+<pre>
+# Force GPO update
+gpupdate /force
+
+# Generate RSoP report
+gpresult /R
+gpresult /H C:\temp\gpreport.html /F
+
+# Check GPO application
+rsop.msc
+
+# Verbose GP logging
+# HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Diagnostics
+# GPSvcDebugLevel = 0x30002 (DWORD)
+# Log: C:\Windows\debug\usermode\gpsvc.log
+</pre>
+
+<h3>2.3 Common GPO Issues</h3>
+<ul>
+<li><strong>GPO not applying:</strong> Check security filtering, WMI filter, link enabled, OU placement</li>
+<li><strong>Slow logon:</strong> Check GPO processing time in event log (Event ID 4016), reduce mapped drives/printers</li>
+<li><strong>Loopback processing:</strong> Replace mode replaces user GPOs, Merge mode combines them</li>
+<li><strong>Preference items failing:</strong> Check item-level targeting, remove "Apply once" if needed</li>
+<li><strong>SYSVOL replication delay:</strong> Check DFS-R health: <code>dfsrdiag pollad</code></li>
+</ul>
+
+<h3>2.4 Security Filtering vs WMI Filtering</h3>
+<ul>
+<li><strong>Security Filtering:</strong> Controls WHO gets the GPO (user/computer/group). Remove "Authenticated Users" and add specific group.</li>
+<li><strong>WMI Filtering:</strong> Controls WHERE based on system properties (OS version, disk space, etc.)</li>
+</ul>
+<pre>
+# WMI filter example: Only Windows 11
+SELECT * FROM Win32_OperatingSystem WHERE Version LIKE "10.0.22%" AND ProductType = "1"
+</pre>
+
+<hr>
+
+<h2>SECTION 3 – AZURE AD / ENTRA ID</h2>
+
+<h3>3.1 Hybrid Identity Architecture</h3>
+<ul>
+<li><strong>Azure AD Connect:</strong> Syncs on-prem AD to Azure AD. Password Hash Sync (PHS) recommended as primary.</li>
+<li><strong>Pass-through Authentication (PTA):</strong> Validates passwords against on-prem AD in real-time.</li>
+<li><strong>Federation (ADFS):</strong> Complex, use only if required by compliance. Moving away from this.</li>
+<li><strong>Cloud-only:</strong> No on-prem dependency. Best for born-in-cloud orgs.</li>
+</ul>
+
+<h3>3.2 Azure AD Connect Troubleshooting</h3>
+<pre>
+# Check sync status
+Start-ADSyncSyncCycle -PolicyType Delta
+Get-ADSyncScheduler
+
+# Force full sync
+Start-ADSyncSyncCycle -PolicyType Initial
+
+# Check connector space
+Get-ADSyncConnectorRunStatus
+
+# Export errors
+Get-ADSyncCSObject -ConnectorName "domain.onmicrosoft.com" -ObjectType user -ErrorsOnly
+
+# Common issue: Object not syncing
+# Check: Filtering rules, OU scoping, attribute conflicts (ProxyAddresses, UPN)
+</pre>
+
+<h3>3.3 Conditional Access Policies</h3>
+<ul>
+<li>Always exclude break-glass accounts from all CA policies</li>
+<li>Require MFA for all users, all cloud apps</li>
+<li>Block legacy authentication</li>
+<li>Require compliant device for sensitive apps</li>
+<li>Named locations for trusted networks</li>
+<li>Session controls for unmanaged devices</li>
+</ul>
+
+<h3>3.4 Entra ID Troubleshooting</h3>
+<pre>
+# Check user sign-in logs
+# Azure Portal > Entra ID > Sign-in logs
+# Filter by user, app, status, CA policy
+
+# Check audit logs for changes
+# Azure Portal > Entra ID > Audit logs
+
+# PowerShell: Connect to Azure AD
+Connect-MgGraph -Scopes "User.Read.All","AuditLog.Read.All"
+Get-MgUser -Filter "displayName eq 'John Smith'"
+Get-MgAuditLogSignIn -Filter "userPrincipalName eq 'user@domain.com'" -Top 10
+</pre>
+
+<hr>
+
+<h2>SECTION 4 – ADFS (Legacy)</h2>
+
+<h3>4.1 ADFS Health Check</h3>
+<pre>
+# Test ADFS service
+Get-AdfsProperties
+Test-AdfsServerHealth
+Get-AdfsEndpoint | Where {$_.Enabled -eq $true}
+
+# Check certificate expiry
+Get-AdfsCertificate | Select CertificateType, Thumbprint, NotAfter
+
+# Check relying party trusts
+Get-AdfsRelyingPartyTrust | Select Name, Enabled, IssuanceTransformRules
+</pre>
+
+<h3>4.2 ADFS Common Issues</h3>
+<ul>
+<li><strong>Token signing cert expired:</strong> Update cert, export to relying parties</li>
+<li><strong>WAP connectivity:</strong> Check trust between WAP and ADFS farm</li>
+<li><strong>Claims rules wrong:</strong> Test with claims-aware test app, review issuance rules</li>
+<li><strong>SSL cert mismatch:</strong> Ensure SAN covers fs.domain.com and enterpriseregistration.domain.com</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 5 – CERTIFICATE SERVICES (AD CS)</h2>
+
+<h3>5.1 PKI Health Check</h3>
+<pre>
+# Check CA health
+certutil -CA
+certutil -CAInfo
+
+# Check CRL distribution
+certutil -verify -urlfetch certificate.cer
+
+# Check certificate templates
+certutil -template
+
+# Check pending requests
+certutil -view -restrict "disposition=9"
+</pre>
+
+<h3>5.2 Common Certificate Issues</h3>
+<ul>
+<li><strong>CRL expired:</strong> Republish CRL: <code>certutil -CRL</code></li>
+<li><strong>Template not available:</strong> Check permissions, CA enrollment services, template replication</li>
+<li><strong>Auto-enrollment failing:</strong> Check GPO, template permissions, CA accessibility</li>
+<li><strong>LDAPS not working:</strong> DC needs a cert with Server Authentication EKU and DC FQDN in SAN</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 6 – L3 ESCALATION DECISION TREE</h2>
+
+<h3>6.1 AD Authentication Failures</h3>
+<ol>
+<li>Check account lockout: <code>Get-ADUser -Identity user -Properties LockedOut,lockoutTime</code></li>
+<li>Check time sync: <code>w32tm /query /status</code> (Kerberos needs &lt;5 min skew)</li>
+<li>Check DC connectivity: <code>nltest /dsgetdc:domain.local</code></li>
+<li>Check DNS resolution: <code>nslookup _ldap._tcp.dc._msdcs.domain.local</code></li>
+<li>Check Kerberos: <code>klist</code> then <code>klist purge</code> and retry</li>
+<li>Check Secure Channel: <code>Test-ComputerSecureChannel -Verbose</code></li>
+<li>If secure channel broken: <code>Test-ComputerSecureChannel -Repair -Credential (Get-Credential)</code></li>
+</ol>
+
+<h3>6.2 Replication Emergency</h3>
+<ol>
+<li>Identify scope: <code>repadmin /replsummary</code></li>
+<li>Check DNS: All DCs resolve each other by FQDN</li>
+<li>Check RPC: <code>portqry -n DC02 -e 135 -p tcp</code></li>
+<li>Check firewall: All AD ports open between DCs</li>
+<li>Force replication: <code>repadmin /syncall /AdeP</code></li>
+<li>If tombstone lifetime exceeded (60/180 days): Do NOT reconnect — metadata cleanup required</li>
+</ol>
+
+</body>
+</html>

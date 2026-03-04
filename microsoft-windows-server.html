@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Microsoft L3 Reference – Windows Server Infrastructure</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Microsoft L3 Support – Windows Server Infrastructure</h1>
+<p><strong>Scope:</strong> DNS, DHCP, File Services, DFS, Hyper-V, Failover Clustering, IIS, WSUS, Print Services, RDS</p>
+
+<hr>
+
+<h2>SECTION 1 – DNS SERVER</h2>
+
+<h3>1.1 DNS Health Validation</h3>
+<pre>
+# Check DNS server health
+dcdiag /test:dns /v /e
+Resolve-DnsName dc01.domain.local
+Get-DnsServerDiagnostics
+Get-DnsServerStatistics
+
+# Check zones
+Get-DnsServerZone
+Get-DnsServerResourceRecord -ZoneName "domain.local" -RRType A
+
+# Check forwarders
+Get-DnsServerForwarder
+
+# Flush DNS cache
+Clear-DnsServerCache
+Clear-DnsClientCache
+</pre>
+
+<h3>1.2 DNS Troubleshooting Methodology</h3>
+<ol>
+<li>Client: <code>ipconfig /all</code> — verify DNS server pointing to DC</li>
+<li>Client: <code>nslookup domain.local</code> — test resolution</li>
+<li>Client: <code>nslookup -type=SRV _ldap._tcp.dc._msdcs.domain.local</code> — test SRV records</li>
+<li>Server: Check DNS service running, zones loaded, forwarders configured</li>
+<li>Server: Check scavenging settings — stale records causing conflicts</li>
+<li>Verify: AD-integrated zone replication between DCs</li>
+</ol>
+
+<h3>1.3 Critical DNS Rules for MSP</h3>
+<ul>
+<li>Domain-joined machines MUST point to internal DNS (DC) — NEVER ISP DNS</li>
+<li>DCs should point to themselves or partner DC for DNS — never external</li>
+<li>Conditional forwarders for multi-domain/trust scenarios</li>
+<li>Enable DNS debug logging for intermittent issues: <code>Set-DnsServerDiagnostics -All $true</code></li>
+<li>Scavenging: Enable on ONE DC only, 7-day no-refresh + 7-day refresh interval</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 2 – DHCP SERVER</h2>
+
+<h3>2.1 DHCP Health Check</h3>
+<pre>
+# Check DHCP server status
+Get-DhcpServerv4Statistics
+Get-DhcpServerv4Scope
+Get-DhcpServerv4Lease -ScopeId 192.168.1.0
+
+# Check scope utilization (alert at 80%+)
+Get-DhcpServerv4ScopeStatistics
+
+# Check failover status
+Get-DhcpServerv4Failover
+
+# Authorize DHCP in AD
+Get-DhcpServerInDC
+</pre>
+
+<h3>2.2 DHCP Best Practices</h3>
+<ul>
+<li>Always use DHCP Failover (Hot Standby or Load Balance) — never single point</li>
+<li>Exclude static IP ranges (servers, printers, network devices)</li>
+<li>Set lease duration: 8 hours for wireless, 1-4 days for wired</li>
+<li>Configure DHCP options: DNS servers (option 6), domain name (option 15), default gateway (option 3)</li>
+<li>Enable conflict detection (1-2 attempts)</li>
+<li>Backup DHCP database regularly</li>
+</ul>
+
+<h3>2.3 DHCP Troubleshooting</h3>
+<ul>
+<li><strong>169.254.x.x address:</strong> Client not reaching DHCP. Check network path, DHCP relay (ip helper-address on router)</li>
+<li><strong>Scope exhausted:</strong> Expand range, reduce lease time, clean stale leases</li>
+<li><strong>Duplicate IPs:</strong> Enable conflict detection, check for rogue DHCP: <code>dhcploc.exe</code></li>
+<li><strong>Failover not replicating:</strong> Check partnership state, force replication</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 3 – FILE SERVICES & DFS</h2>
+
+<h3>3.1 File Server Health</h3>
+<pre>
+# Check shares
+Get-SmbShare
+Get-SmbSession
+Get-SmbOpenFile
+
+# Check NTFS permissions
+Get-Acl "D:\Shares\Finance" | Format-List
+
+# Check disk usage
+Get-Volume
+Get-WmiObject Win32_LogicalDisk | Select DeviceID, @{N='FreeGB';E={[math]::Round($_.FreeSpace/1GB,2)}}, @{N='TotalGB';E={[math]::Round($_.Size/1GB,2)}}
+</pre>
+
+<h3>3.2 DFS Namespace & Replication</h3>
+<pre>
+# Check DFS-N health
+dfsutil /root:\\domain.local\dfsroot /view
+Get-DfsnRoot
+Get-DfsnFolder -Path "\\domain.local\dfsroot\*"
+
+# Check DFS-R health
+Get-DfsReplicationGroup
+Get-DfsrBacklog -GroupName "RG01" -SourceComputerName SRV01 -DestinationComputerName SRV02
+dfsrdiag pollad
+
+# DFS-R debug logging
+wevtutil sl "DFS Replication" /e:true /ms:20971520
+</pre>
+
+<h3>3.3 Common File Server Issues</h3>
+<ul>
+<li><strong>Access denied:</strong> Check share permissions AND NTFS permissions (most restrictive wins)</li>
+<li><strong>ABE (Access-Based Enumeration):</strong> Users only see folders they have access to — enable per share</li>
+<li><strong>DFS-R backlog:</strong> Normal if &lt;100 files; investigate if growing: bandwidth, conflict, staging area full</li>
+<li><strong>VSS snapshots failing:</strong> Check disk space on shadow copy volume, max size setting</li>
+<li><strong>FSRM quotas/screening:</strong> Use for controlling storage, blocking executables in user shares</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 4 – HYPER-V</h2>
+
+<h3>4.1 Hyper-V Health Check</h3>
+<pre>
+# VM status
+Get-VM | Select Name, State, CPUUsage, MemoryAssigned, Uptime
+Get-VM | Where {$_.State -eq 'Running'} | Get-VMIntegrationService
+
+# Check virtual switches
+Get-VMSwitch
+Get-VMNetworkAdapter -All
+
+# Check storage
+Get-VHD -Path "C:\VMs\disk.vhdx"
+Get-VM | Get-VMHardDiskDrive | Select VMName, Path
+
+# Check replication (if Hyper-V Replica configured)
+Get-VMReplication
+Measure-VMReplication
+</pre>
+
+<h3>4.2 Hyper-V Best Practices</h3>
+<ul>
+<li>Use Generation 2 VMs for UEFI/Secure Boot support</li>
+<li>Dynamic memory: Set startup RAM, min/max range</li>
+<li>Use VHDX (not VHD) — supports up to 64TB</li>
+<li>Separate management OS traffic from VM traffic (dedicated NICs)</li>
+<li>Enable Integration Services on all VMs</li>
+<li>Regular checkpoint cleanup — checkpoints are NOT backups</li>
+<li>Reserve 10-15% host resources for management OS</li>
+</ul>
+
+<h3>4.3 Hyper-V Troubleshooting</h3>
+<ul>
+<li><strong>VM won't start:</strong> Check available resources, VHD path, config version compatibility</li>
+<li><strong>Slow VM performance:</strong> Check overcommit ratio, disk I/O (use VHDX on SSD), network saturation</li>
+<li><strong>Network connectivity:</strong> Check virtual switch binding, VLAN tagging, MAC spoofing settings</li>
+<li><strong>Live Migration failure:</strong> Check credentials, network, compatible processor, shared storage</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 5 – FAILOVER CLUSTERING</h2>
+
+<h3>5.1 Cluster Validation</h3>
+<pre>
+# Run cluster validation (BEFORE creating cluster)
+Test-Cluster -Node Node01,Node02 -Include "Storage","Network","System Configuration"
+
+# Check cluster health
+Get-ClusterNode
+Get-ClusterGroup
+Get-ClusterResource | Where {$_.State -ne 'Online'}
+Get-ClusterLog -Destination C:\temp -TimeSpan 60
+
+# Check quorum
+Get-ClusterQuorum
+
+# Check CSV health
+Get-ClusterSharedVolume
+Get-ClusterSharedVolumeState
+</pre>
+
+<h3>5.2 Quorum Models</h3>
+<table border="1">
+<tr><th>Nodes</th><th>Recommended Witness</th></tr>
+<tr><td>2 nodes</td><td>File Share Witness or Cloud Witness (mandatory)</td></tr>
+<tr><td>3-4 nodes</td><td>File Share Witness or Cloud Witness (recommended)</td></tr>
+<tr><td>5+ nodes (odd)</td><td>No witness needed</td></tr>
+<tr><td>5+ nodes (even)</td><td>File Share Witness or Cloud Witness</td></tr>
+</table>
+
+<h3>5.3 Cluster Troubleshooting</h3>
+<ul>
+<li><strong>Split-brain:</strong> Quorum witness prevents — always configure a witness</li>
+<li><strong>Failover not working:</strong> Check preferred owner, failback settings, resource dependencies</li>
+<li><strong>CSV offline:</strong> Check disk health, redirected access mode, ownership</li>
+<li><strong>Network partition:</strong> Ensure separate heartbeat network, check switch config</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 6 – IIS WEB SERVER</h2>
+
+<h3>6.1 IIS Troubleshooting</h3>
+<pre>
+# Check application pool status
+Get-WebAppPoolState
+Get-ChildItem IIS:\AppPools
+
+# Check site bindings
+Get-Website | Select Name, State, Bindings
+
+# Check failed request tracing
+# Enable in IIS Manager > Failed Request Tracing Rules
+
+# Check HTTP.sys error log
+C:\Windows\System32\LogFiles\HTTPERR\
+
+# Recycle app pool
+Restart-WebAppPool -Name "DefaultAppPool"
+</pre>
+
+<h3>6.2 Common IIS Issues</h3>
+<table border="1">
+<tr><th>HTTP Error</th><th>Cause</th><th>Fix</th></tr>
+<tr><td>500.19</td><td>Bad web.config</td><td>Check XML syntax, permissions on web.config</td></tr>
+<tr><td>500.21</td><td>Handler not configured</td><td>Enable handler mapping, check .NET version</td></tr>
+<tr><td>503</td><td>App pool stopped</td><td>Check event log, fix app pool identity, recycle</td></tr>
+<tr><td>502.3</td><td>Backend timeout</td><td>Increase ARR timeout, check backend health</td></tr>
+<tr><td>401.1</td><td>Authentication failure</td><td>Check auth method, SPN, Kerberos delegation</td></tr>
+</table>
+
+<hr>
+
+<h2>SECTION 7 – WSUS</h2>
+
+<h3>7.1 WSUS Maintenance</h3>
+<pre>
+# Run WSUS cleanup wizard via PowerShell
+Invoke-WsusServerCleanup -CleanupObsoleteUpdates -CleanupUnneededContentFiles -CompressUpdates -DeclineExpiredUpdates -DeclineSupersededUpdates
+
+# Re-index WSUS database
+sqlcmd -S \\.\pipe\Microsoft##WID\tsql\query -i "C:\scripts\WsusDBMaintenance.sql"
+
+# Check client reporting
+Get-WsusComputer -NameIncludes "PC01"
+</pre>
+
+<h3>7.2 WSUS Client Troubleshooting</h3>
+<pre>
+# On client machine:
+wuauclt /detectnow /reportnow
+usoclient StartScan
+# Check: HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
+# WUServer and WUStatusServer must match WSUS URL
+
+# Reset Windows Update
+net stop wuauserv
+net stop bits
+ren C:\Windows\SoftwareDistribution SoftwareDistribution.old
+net start wuauserv
+net start bits
+</pre>
+
+<hr>
+
+<h2>SECTION 8 – REMOTE DESKTOP SERVICES (RDS)</h2>
+
+<h3>8.1 RDS Troubleshooting</h3>
+<pre>
+# Check RD licensing
+Get-RDLicenseConfiguration
+Get-WmiObject Win32_TSLicenseServer
+
+# Check session host health
+Get-RDSessionHost -CollectionName "DesktopCollection"
+Get-RDUserSession
+
+# Check RD Gateway
+Get-RDServer -Role "RDS-GATEWAY"
+# Test: https://rdgateway.domain.com/RDWeb
+
+# Certificate issues
+# Check: Server Manager > RDS > Deployment Properties > Certificates
+# All roles need valid cert matching external FQDN
+</pre>
+
+<h3>8.2 Common RDS Issues</h3>
+<ul>
+<li><strong>Licensing grace period expired:</strong> Properly configure RD Licensing, point session hosts to license server</li>
+<li><strong>"CredSSP encryption oracle" error:</strong> Update both client and server, or set registry AllowEncryptionOracle=2 (temporary)</li>
+<li><strong>Slow sessions:</strong> Check bandwidth, disable visual effects, check anti-virus exclusions</li>
+<li><strong>Printer redirection failing:</strong> Check Easy Print driver, GPO settings for printer redirection</li>
+<li><strong>Drive redirection blocked:</strong> Check GPO: Computer Config > Admin Templates > RDS > Device and Resource Redirection</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Microsoft L3 Reference – Security & Compliance</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Microsoft L3 Support – Security & Compliance</h1>
+<p><strong>Scope:</strong> Defender for Endpoint, Defender for Identity, Sentinel, Purview, Secure Score, Incident Response, Zero Trust</p>
+
+<hr>
+
+<h2>SECTION 1 – MICROSOFT DEFENDER FOR ENDPOINT (MDE)</h2>
+
+<h3>1.1 Onboarding Verification</h3>
+<pre>
+# Check MDE sensor status
+sc query sense
+Get-Service -Name "sense"
+
+# Check connectivity (run on endpoint)
+# Download: https://aka.ms/mdeclientanalyzer
+MDATPClientAnalyzer.cmd
+
+# Manual onboarding check
+reg query "HKLM\SOFTWARE\Microsoft\Windows Advanced Threat Protection\Status" /v OnboardingState
+# Value 1 = onboarded
+
+# Check MDE in event log
+wevtutil qe "Microsoft-Windows-SENSE/Operational" /c:10 /f:text
+
+# Force detection test (EICAR-like)
+powershell.exe -NoExit -ExecutionPolicy Bypass -WindowStyle Hidden (New-Object System.Net.WebClient).DownloadFile('https://secure.eicar.org/eicar.com','C:\temp\eicar.com')
+</pre>
+
+<h3>1.2 MDE Troubleshooting</h3>
+<ul>
+<li><strong>Device not appearing in portal:</strong> Check onboarding script ran, sense service running, network connectivity to *.securitycenter.windows.com</li>
+<li><strong>Alerts not generating:</strong> Check policy assignments, exclusions too broad, sensor health</li>
+<li><strong>Performance impact:</strong> Check exclusions for known applications (SQL, Exchange, backup agents)</li>
+<li><strong>EDR in block mode:</strong> Available even if 3rd party AV is primary — blocks missed threats</li>
+</ul>
+
+<h3>1.3 Attack Surface Reduction (ASR) Rules</h3>
+<ul>
+<li>Block executable content from email client and webmail</li>
+<li>Block Office applications from creating child processes</li>
+<li>Block Office applications from injecting code into other processes</li>
+<li>Block JavaScript or VBScript from launching downloaded executable content</li>
+<li>Block execution of potentially obfuscated scripts</li>
+<li>Block credential stealing from Windows LSASS</li>
+<li>Block process creations from PSExec and WMI commands</li>
+</ul>
+<pre>
+# Check ASR rules via PowerShell
+Get-MpPreference | Select AttackSurfaceReductionRules_Ids, AttackSurfaceReductionRules_Actions
+
+# ASR rule actions: 0=Disabled, 1=Block, 2=Audit, 6=Warn
+</pre>
+
+<hr>
+
+<h2>SECTION 2 – MICROSOFT DEFENDER FOR IDENTITY</h2>
+
+<h3>2.1 Defender for Identity Monitoring</h3>
+<ul>
+<li>Detects: Pass-the-Hash, Pass-the-Ticket, Golden Ticket, DCSync, brute force, lateral movement</li>
+<li>Sensor installed on DCs — reads AD traffic and Windows events</li>
+<li>Requires: .NET 4.7+, port 443 to *.atp.azure.com, event IDs 4776, 4732, 4733, 4728, 4729, 8004</li>
+</ul>
+
+<h3>2.2 Key Detections to Monitor</h3>
+<table border="1">
+<tr><th>Alert</th><th>Severity</th><th>Response</th></tr>
+<tr><td>Suspected DCSync attack</td><td>Critical</td><td>Verify account, check replication permissions, rotate krbtgt</td></tr>
+<tr><td>Suspected Golden Ticket</td><td>Critical</td><td>Rotate krbtgt password TWICE, investigate compromised account</td></tr>
+<tr><td>Suspected brute force (Kerberos/NTLM)</td><td>Medium</td><td>Check source IP, lockout policy, investigate account</td></tr>
+<tr><td>Reconnaissance via DNS</td><td>Low</td><td>Check if legitimate admin tool, block if malicious</td></tr>
+<tr><td>Suspected identity theft (Pass-the-Hash)</td><td>High</td><td>Isolate source machine, reset compromised credential</td></tr>
+</table>
+
+<hr>
+
+<h2>SECTION 3 – MICROSOFT SENTINEL (SIEM)</h2>
+
+<h3>3.1 Essential KQL Queries</h3>
+<pre>
+// Failed sign-ins from external IPs
+SigninLogs
+| where ResultType != "0"
+| where IPAddress !startswith "10." and IPAddress !startswith "192.168."
+| summarize FailureCount=count() by UserPrincipalName, IPAddress, ResultDescription
+| where FailureCount > 5
+| order by FailureCount desc
+
+// Impossible travel detection
+SigninLogs
+| where ResultType == "0"
+| summarize Locations=make_set(Location), LocationCount=dcount(Location) by UserPrincipalName, bin(TimeGenerated, 1h)
+| where LocationCount > 1
+
+// Suspicious PowerShell execution
+SecurityEvent
+| where EventID == 4688
+| where CommandLine has_any ("Invoke-Mimikatz","Invoke-Expression","DownloadString","EncodedCommand","-enc")
+| project TimeGenerated, Computer, Account, CommandLine
+
+// MFA fatigue / push spam
+SigninLogs
+| where ResultType == "50074" // MFA required
+| summarize Attempts=count() by UserPrincipalName, bin(TimeGenerated, 10m)
+| where Attempts > 5
+
+// Mailbox forwarding rules (data exfil indicator)
+OfficeActivity
+| where Operation == "New-InboxRule" or Operation == "Set-InboxRule"
+| where Parameters has "ForwardTo" or Parameters has "RedirectTo"
+| project TimeGenerated, UserId, Operation, Parameters
+</pre>
+
+<h3>3.2 Sentinel Best Practices</h3>
+<ul>
+<li>Connect all M365 data connectors (Azure AD, O365, MDE, Defender for Cloud)</li>
+<li>Enable UEBA (User and Entity Behavior Analytics)</li>
+<li>Tune analytics rules — reduce false positives before going to production</li>
+<li>Use Watchlists for VIP users, critical assets, known IOCs</li>
+<li>Automate with Playbooks (Logic Apps) for common response actions</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 4 – ZERO TRUST ARCHITECTURE</h2>
+
+<h3>4.1 Zero Trust Principles</h3>
+<ol>
+<li><strong>Verify explicitly:</strong> Always authenticate and authorize based on all available data points</li>
+<li><strong>Use least privilege access:</strong> Limit user access with JIT/JEA, risk-based adaptive policies</li>
+<li><strong>Assume breach:</strong> Minimize blast radius, segment access, verify E2E encryption, use analytics</li>
+</ol>
+
+<h3>4.2 Zero Trust Implementation Checklist (Microsoft Stack)</h3>
+<table border="1">
+<tr><th>Pillar</th><th>Technology</th><th>Actions</th></tr>
+<tr><td>Identity</td><td>Entra ID</td><td>MFA for all, Conditional Access, PIM, passwordless</td></tr>
+<tr><td>Endpoints</td><td>Intune + MDE</td><td>Compliance policies, app protection, EDR</td></tr>
+<tr><td>Apps</td><td>Defender for Cloud Apps</td><td>Shadow IT discovery, session controls, app governance</td></tr>
+<tr><td>Data</td><td>Purview</td><td>Sensitivity labels, DLP policies, encryption</td></tr>
+<tr><td>Infrastructure</td><td>Azure / Defender for Cloud</td><td>Just-in-time VM access, NSG micro-segmentation</td></tr>
+<tr><td>Network</td><td>Azure Firewall / Entra Private Access</td><td>Micro-segmentation, encrypted transport, no implicit trust</td></tr>
+</table>
+
+<hr>
+
+<h2>SECTION 5 – MICROSOFT PURVIEW (COMPLIANCE)</h2>
+
+<h3>5.1 Data Loss Prevention (DLP)</h3>
+<ul>
+<li>Protect sensitive data (SSN, credit cards, health records) across Exchange, SharePoint, Teams, endpoints</li>
+<li>Policy tip: Warn users before they share sensitive content</li>
+<li>Block: Prevent sharing with external users</li>
+<li>Override: Allow with business justification</li>
+</ul>
+
+<h3>5.2 Sensitivity Labels</h3>
+<ul>
+<li>Public, Internal, Confidential, Highly Confidential</li>
+<li>Apply encryption and access restrictions</li>
+<li>Auto-labeling based on content inspection</li>
+<li>Container labels for Teams, SharePoint sites, M365 groups</li>
+</ul>
+
+<h3>5.3 Retention Policies</h3>
+<ul>
+<li>Retain and/or delete content after specified period</li>
+<li>Apply to Exchange, SharePoint, OneDrive, Teams, Yammer</li>
+<li>Retention labels for item-level control</li>
+<li>Disposition review for regulated content</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 6 – INCIDENT RESPONSE PLAYBOOK</h2>
+
+<h3>6.1 Compromised Account Response</h3>
+<ol>
+<li>Reset password immediately</li>
+<li>Revoke all refresh tokens: <code>Revoke-MgUserSignInSession -UserId user@domain.com</code></li>
+<li>Check and remove mailbox forwarding rules</li>
+<li>Check and remove OAuth app consents</li>
+<li>Review sign-in logs for scope of compromise</li>
+<li>Check Inbox rules, delegates, mobile device access</li>
+<li>Enable MFA if not already enabled</li>
+<li>Notify user and document incident</li>
+</ol>
+
+<h3>6.2 Ransomware Response</h3>
+<ol>
+<li>Isolate affected machines (disconnect from network, NOT power off)</li>
+<li>Identify ransomware variant (ransom note, encrypted file extension)</li>
+<li>Check scope: which machines, which shares, which backup data affected</li>
+<li>Preserve evidence: memory dumps, event logs, network logs</li>
+<li>Check backup integrity BEFORE restoring</li>
+<li>Identify entry point: phishing email, RDP brute force, vulnerability exploit</li>
+<li>Remediate entry point before restoring</li>
+<li>Restore from clean backup</li>
+<li>Rotate ALL credentials (domain admin, service accounts, krbtgt)</li>
+<li>Post-incident review and documentation</li>
+</ol>
+
+<h3>6.3 Business Email Compromise (BEC) Response</h3>
+<ol>
+<li>Secure the account (reset password, revoke sessions, enable MFA)</li>
+<li>Search message trace for phishing emails sent FROM the account</li>
+<li>Check Inbox rules for hidden forwarding</li>
+<li>Check OAuth consents for malicious apps</li>
+<li>Notify recipients of fraudulent emails</li>
+<li>If financial fraud attempted: notify bank immediately, file police report</li>
+<li>Review Unified Audit Log for all account activity during compromise</li>
+</ol>
+
+<hr>
+
+<h2>SECTION 7 – SECURE SCORE PRIORITIES</h2>
+<ul>
+<li>Enable MFA for all admins (Critical)</li>
+<li>Block legacy authentication (Critical)</li>
+<li>Enable self-service password reset (High)</li>
+<li>Don't expire passwords (use banned password list instead) (High)</li>
+<li>Protect all users with sign-in risk policy (High)</li>
+<li>Require MFA for all users (High)</li>
+<li>Enable Microsoft Defender for Office 365 Safe Attachments (High)</li>
+<li>Enable audit logging (Critical)</li>
+<li>Create DLP policies (Medium)</li>
+<li>Enable privileged identity management (High)</li>
+</ul>
+
+</body>
+</html>

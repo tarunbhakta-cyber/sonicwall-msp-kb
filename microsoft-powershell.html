@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Microsoft L3 Reference – PowerShell & Automation</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Microsoft L3 Support – PowerShell & Automation</h1>
+<p><strong>Scope:</strong> PowerShell core patterns, AD automation, M365 management, Azure CLI/PS, remote management, scripting for MSP</p>
+
+<hr>
+
+<h2>SECTION 1 – ESSENTIAL POWERSHELL PATTERNS</h2>
+
+<h3>1.1 Remote Management</h3>
+<pre>
+# Enable PSRemoting (run as admin on target)
+Enable-PSRemoting -Force
+
+# Remote session
+Enter-PSSession -ComputerName SRV01 -Credential (Get-Credential)
+
+# Run command on multiple machines
+Invoke-Command -ComputerName SRV01,SRV02,SRV03 -ScriptBlock { Get-Service | Where Status -eq "Stopped" }
+
+# Persistent session (reuse connection)
+$session = New-PSSession -ComputerName SRV01
+Invoke-Command -Session $session -ScriptBlock { Get-Process }
+Remove-PSSession $session
+
+# WinRM troubleshooting
+winrm quickconfig
+Test-WSMan -ComputerName SRV01
+# If failing: Check WinRM service, firewall (5985/5986), TrustedHosts
+</pre>
+
+<h3>1.2 Error Handling</h3>
+<pre>
+try {
+    Get-ADUser -Identity "nonexistent" -ErrorAction Stop
+} catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+    Write-Warning "User not found: $_"
+} catch {
+    Write-Error "Unexpected error: $($_.Exception.Message)"
+} finally {
+    # Cleanup code runs always
+}
+
+# Transcript logging for all scripts
+Start-Transcript -Path "C:\Logs\script-$(Get-Date -Format yyyyMMdd-HHmmss).log"
+# ... script body ...
+Stop-Transcript
+</pre>
+
+<h3>1.3 Output & Reporting</h3>
+<pre>
+# Export to CSV
+Get-ADUser -Filter * -Properties LastLogonDate |
+    Select Name, SamAccountName, LastLogonDate, Enabled |
+    Export-Csv -Path "C:\Reports\users.csv" -NoTypeInformation
+
+# HTML report
+$html = Get-Service | Where Status -eq "Stopped" | ConvertTo-Html -Title "Stopped Services"
+$html | Out-File "C:\Reports\services.html"
+
+# Send email report
+Send-MailMessage -From "reports@domain.com" -To "admin@domain.com" -Subject "Daily Report" -Body $html -BodyAsHtml -SmtpServer "smtp.domain.com"
+</pre>
+
+<hr>
+
+<h2>SECTION 2 – ACTIVE DIRECTORY AUTOMATION</h2>
+
+<h3>2.1 User Management</h3>
+<pre>
+# Bulk user creation from CSV
+Import-Csv "C:\newusers.csv" | ForEach-Object {
+    New-ADUser -Name "$($_.FirstName) $($_.LastName)" `
+        -GivenName $_.FirstName -Surname $_.LastName `
+        -SamAccountName $_.Username -UserPrincipalName "$($_.Username)@domain.com" `
+        -Path "OU=Users,DC=domain,DC=local" `
+        -AccountPassword (ConvertTo-SecureString $_.Password -AsPlainText -Force) `
+        -Enabled $true -ChangePasswordAtLogon $true
+}
+
+# Find inactive users (90+ days)
+$cutoff = (Get-Date).AddDays(-90)
+Get-ADUser -Filter {LastLogonDate -lt $cutoff -and Enabled -eq $true} -Properties LastLogonDate |
+    Select Name, SamAccountName, LastLogonDate
+
+# Find locked out users
+Search-ADAccount -LockedOut | Select Name, SamAccountName, LockedOut
+
+# Unlock all locked accounts
+Search-ADAccount -LockedOut | Unlock-ADAccount
+
+# Password expiration report
+Get-ADUser -Filter {Enabled -eq $true -and PasswordNeverExpires -eq $false} -Properties "msDS-UserPasswordExpiryTimeComputed" |
+    Select Name, @{N="ExpiryDate";E={[datetime]::FromFileTime($_."msDS-UserPasswordExpiryTimeComputed")}} |
+    Where {$_.ExpiryDate -lt (Get-Date).AddDays(7)}
+</pre>
+
+<h3>2.2 Computer Account Management</h3>
+<pre>
+# Find stale computers (90+ days)
+$cutoff = (Get-Date).AddDays(-90)
+Get-ADComputer -Filter {LastLogonDate -lt $cutoff} -Properties LastLogonDate |
+    Select Name, LastLogonDate, DistinguishedName
+
+# Move computers to OU
+Get-ADComputer -Filter {Name -like "WS-*"} | Move-ADObject -TargetPath "OU=Workstations,DC=domain,DC=local"
+
+# Disable stale computers
+Get-ADComputer -Filter {LastLogonDate -lt $cutoff -and Enabled -eq $true} -Properties LastLogonDate |
+    Set-ADComputer -Enabled $false
+</pre>
+
+<h3>2.3 Group Management</h3>
+<pre>
+# Get group membership
+Get-ADGroupMember -Identity "Domain Admins" -Recursive | Select Name, SamAccountName
+
+# Find all groups a user belongs to
+Get-ADPrincipalGroupMembership -Identity "jsmith" | Select Name
+
+# Nested group membership audit
+function Get-NestedGroupMember {
+    param([string]$GroupName)
+    Get-ADGroupMember $GroupName | ForEach-Object {
+        if ($_.ObjectClass -eq "group") {
+            Get-NestedGroupMember $_.Name
+        } else { $_ }
+    }
+}
+Get-NestedGroupMember "VPN-Users" | Select Name, SamAccountName -Unique
+</pre>
+
+<hr>
+
+<h2>SECTION 3 – M365 POWERSHELL MODULES</h2>
+
+<h3>3.1 Module Connection Reference</h3>
+<pre>
+# Microsoft Graph (replaces AzureAD and MSOnline)
+Install-Module Microsoft.Graph -Scope CurrentUser
+Connect-MgGraph -Scopes "User.Read.All","Group.ReadWrite.All"
+
+# Exchange Online
+Install-Module ExchangeOnlineManagement
+Connect-ExchangeOnline -UserPrincipalName admin@domain.com
+
+# SharePoint Online
+Install-Module Microsoft.Online.SharePoint.PowerShell
+Connect-SPOService -Url https://tenant-admin.sharepoint.com
+
+# Teams
+Install-Module MicrosoftTeams
+Connect-MicrosoftTeams
+
+# Security & Compliance
+Connect-IPPSSession -UserPrincipalName admin@domain.com
+</pre>
+
+<h3>3.2 Common M365 Automation Scripts</h3>
+<pre>
+# Bulk license assignment
+$users = Get-Content "C:\users.txt"
+$sku = Get-MgSubscribedSku | Where {$_.SkuPartNumber -eq "ENTERPRISEPACK"}
+foreach ($user in $users) {
+    Set-MgUserLicense -UserId $user -AddLicenses @{SkuId=$sku.SkuId} -RemoveLicenses @()
+}
+
+# Export all mailbox sizes
+Get-Mailbox -ResultSize Unlimited | Get-MailboxStatistics |
+    Select DisplayName, ItemCount, @{N="SizeMB";E={[math]::Round(($_.TotalItemSize.ToString().Split("(")[1].Split(" ")[0].Replace(",",""))/1MB,2)}} |
+    Sort SizeMB -Descending | Export-Csv "C:\mailbox-sizes.csv" -NoTypeInformation
+
+# Shared mailbox permissions audit
+Get-Mailbox -RecipientTypeDetails SharedMailbox | ForEach-Object {
+    $mb = $_.DisplayName
+    Get-MailboxPermission $_.Identity | Where {$_.User -notlike "NT AUTHORITY*" -and $_.IsInherited -eq $false} |
+        Select @{N="Mailbox";E={$mb}}, User, AccessRights
+} | Export-Csv "C:\shared-mailbox-audit.csv" -NoTypeInformation
+</pre>
+
+<hr>
+
+<h2>SECTION 4 – AZURE POWERSHELL / CLI</h2>
+
+<h3>4.1 Azure Resource Management</h3>
+<pre>
+# Connect
+Connect-AzAccount
+# or CLI: az login
+
+# List VMs with status
+Get-AzVM -Status | Select ResourceGroupName, Name, PowerState, Location
+
+# Start/stop VMs
+Start-AzVM -ResourceGroupName "RG01" -Name "VM01"
+Stop-AzVM -ResourceGroupName "RG01" -Name "VM01" -Force  # deallocates
+
+# Snapshot a disk
+$vm = Get-AzVM -ResourceGroupName "RG01" -Name "VM01"
+$disk = Get-AzDisk -ResourceGroupName "RG01" -DiskName $vm.StorageProfile.OsDisk.Name
+$snapshot = New-AzSnapshotConfig -SourceUri $disk.Id -Location $disk.Location -CreateOption Copy
+New-AzSnapshot -ResourceGroupName "RG01" -SnapshotName "VM01-snap" -Snapshot $snapshot
+</pre>
+
+<hr>
+
+<h2>SECTION 5 – MSP AUTOMATION PATTERNS</h2>
+
+<h3>5.1 Scheduled Task Template</h3>
+<pre>
+# Create scheduled task to run PowerShell script
+$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File C:\Scripts\DailyReport.ps1"
+$trigger = New-ScheduledTaskTrigger -Daily -At "6:00AM"
+$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount
+Register-ScheduledTask -TaskName "Daily Report" -Action $action -Trigger $trigger -Principal $principal
+</pre>
+
+<h3>5.2 Health Check Script Template</h3>
+<pre>
+# Multi-server health check
+$servers = "DC01","DC02","FS01","SQL01"
+$results = foreach ($server in $servers) {
+    $ping = Test-Connection $server -Count 1 -Quiet
+    $services = Invoke-Command -ComputerName $server -ScriptBlock {
+        Get-Service -Name DNS,NTDS,W32Time,DFSR | Select Name, Status
+    } -ErrorAction SilentlyContinue
+    [PSCustomObject]@{
+        Server = $server
+        Online = $ping
+        Services = ($services | Where Status -ne "Running" | ForEach Name) -join ", "
+    }
+}
+$results | Format-Table -AutoSize
+</pre>
+
+</body>
+</html>

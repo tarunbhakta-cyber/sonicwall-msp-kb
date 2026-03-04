@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Microsoft L3 Reference – Microsoft 365 Administration</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Microsoft L3 Support – Microsoft 365 Administration</h1>
+<p><strong>Scope:</strong> Exchange Online, SharePoint Online, Teams, OneDrive, Intune/Endpoint Manager, Purview, Defender for O365</p>
+
+<hr>
+
+<h2>SECTION 1 – EXCHANGE ONLINE</h2>
+
+<h3>1.1 Exchange Online PowerShell</h3>
+<pre>
+# Connect
+Connect-ExchangeOnline -UserPrincipalName admin@domain.com
+
+# Mailbox diagnostics
+Get-Mailbox -Identity user@domain.com | FL
+Get-MailboxStatistics -Identity user@domain.com
+Get-MailboxPermission -Identity user@domain.com
+Get-RecipientPermission -Identity user@domain.com  # Send-As
+
+# Message trace (last 10 days)
+Get-MessageTrace -SenderAddress user@domain.com -StartDate (Get-Date).AddDays(-7) -EndDate (Get-Date)
+
+# Historical message trace (10-90 days)
+Start-HistoricalSearch -ReportTitle "Search1" -StartDate "03/01/2026" -EndDate "03/04/2026" -ReportType MessageTrace -SenderAddress user@domain.com
+</pre>
+
+<h3>1.2 Mail Flow Troubleshooting</h3>
+<ul>
+<li><strong>NDR 550 5.1.1:</strong> Recipient doesn't exist. Check address, aliases, mail-enabled group membership</li>
+<li><strong>NDR 550 5.7.1:</strong> Relay denied. Check accepted domains, connector config, SPF</li>
+<li><strong>Stuck in Outbox:</strong> Check message size limits, shared mailbox send-as permissions, Outlook profile</li>
+<li><strong>Delayed delivery:</strong> Check transport rules, connectors, partner org throttling</li>
+<li><strong>External not receiving:</strong> Check SPF, DKIM, DMARC, MX records, connector restrictions</li>
+</ul>
+
+<h3>1.3 Email Authentication (SPF/DKIM/DMARC)</h3>
+<pre>
+# SPF Record (DNS TXT)
+v=spf1 include:spf.protection.outlook.com -all
+
+# DKIM — Enable via Exchange Admin Center or PowerShell
+New-DkimSigningConfig -DomainName domain.com -Enabled $true
+Get-DkimSigningConfig -Identity domain.com
+
+# DMARC Record (DNS TXT at _dmarc.domain.com)
+v=DMARC1; p=quarantine; rua=mailto:dmarc@domain.com; pct=100
+
+# Validate records
+nslookup -type=txt domain.com
+nslookup -type=txt selector1._domainkey.domain.com
+nslookup -type=txt _dmarc.domain.com
+</pre>
+
+<h3>1.4 Shared Mailbox / Distribution Group / M365 Group</h3>
+<table border="1">
+<tr><th>Feature</th><th>Shared Mailbox</th><th>Distribution Group</th><th>M365 Group</th></tr>
+<tr><td>License needed</td><td>No (under 50GB)</td><td>No</td><td>No (but features need licenses)</td></tr>
+<tr><td>Calendar</td><td>Yes</td><td>No</td><td>Yes</td></tr>
+<tr><td>Teams integration</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>Inbox rules</td><td>Yes</td><td>No</td><td>Limited</td></tr>
+<tr><td>Send As / Send on Behalf</td><td>Both</td><td>Send As only</td><td>Both</td></tr>
+</table>
+
+<h3>1.5 Retention & Litigation Hold</h3>
+<pre>
+# Place mailbox on litigation hold
+Set-Mailbox -Identity user@domain.com -LitigationHoldEnabled $true -LitigationHoldDuration 365
+
+# Check hold status
+Get-Mailbox -Identity user@domain.com | FL LitigationHoldEnabled,InPlaceHolds,RetentionPolicy
+
+# Retention policies (M365 Compliance / Purview)
+Get-RetentionCompliancePolicy
+Get-RetentionComplianceRule
+</pre>
+
+<hr>
+
+<h2>SECTION 2 – SHAREPOINT ONLINE</h2>
+
+<h3>2.1 SharePoint Administration</h3>
+<pre>
+# Connect
+Connect-SPOService -Url https://domain-admin.sharepoint.com
+
+# Check site collections
+Get-SPOSite -Limit All | Select Url, StorageUsageCurrent, Template
+
+# Check permissions
+Get-SPOSiteGroup -Site https://domain.sharepoint.com/sites/Finance
+
+# Storage management
+Get-SPOTenant | Select StorageQuota, StorageQuotaAllocated
+
+# External sharing settings
+Get-SPOTenant | Select SharingCapability
+# Values: Disabled, ExternalUserSharingOnly, ExternalUserAndGuestSharing, ExistingExternalUserSharingOnly
+</pre>
+
+<h3>2.2 Common SharePoint Issues</h3>
+<ul>
+<li><strong>Sync errors (OneDrive client):</strong> Check file name/path length (400 char limit), unsupported characters, file size (250GB max)</li>
+<li><strong>Permission inheritance broken:</strong> Check unique permissions on library/folder/item level</li>
+<li><strong>"Access Denied" after migration:</strong> Recheck permissions, clear browser cache, check conditional access</li>
+<li><strong>Versioning eating storage:</strong> Set version limits (recommend 50-100 major versions)</li>
+<li><strong>Search not returning results:</strong> Check crawl status, managed properties, content source</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 3 – MICROSOFT TEAMS</h2>
+
+<h3>3.1 Teams Administration</h3>
+<pre>
+# Connect
+Connect-MicrosoftTeams
+
+# Check team info
+Get-Team -DisplayName "IT Support"
+Get-TeamUser -GroupId <groupId>
+
+# Check Teams policies
+Get-CsTeamsMeetingPolicy
+Get-CsTeamsMessagingPolicy
+Get-CsTeamsCallingPolicy
+
+# Check PSTN/calling
+Get-CsOnlineUser -Identity user@domain.com | Select LineURI, EnterpriseVoiceEnabled, TeamsUpgradeEffectiveMode
+</pre>
+
+<h3>3.2 Teams Troubleshooting</h3>
+<ul>
+<li><strong>Call quality issues:</strong> Check Teams Admin Center > Call Analytics, run network assessment tool</li>
+<li><strong>Can't create teams:</strong> Check M365 group creation policy (Azure AD > Group settings)</li>
+<li><strong>Guest access not working:</strong> Check Teams admin > Org-wide settings > Guest access, Azure AD external collaboration settings</li>
+<li><strong>Federation issues:</strong> Check Teams admin > External access, DNS SRV records for federation</li>
+<li><strong>Teams phone issues:</strong> Check voice routing policies, dial plans, PSTN connectivity (Direct Routing/Calling Plans)</li>
+</ul>
+
+<h3>3.3 Teams Network Requirements</h3>
+<table border="1">
+<tr><th>Traffic</th><th>Ports</th><th>Bandwidth</th></tr>
+<tr><td>Audio</td><td>UDP 3478-3481</td><td>~100 kbps per call</td></tr>
+<tr><td>Video</td><td>UDP 3478-3481</td><td>1.5-4 Mbps per stream</td></tr>
+<tr><td>Screen Share</td><td>UDP 3478-3481</td><td>1-2 Mbps</td></tr>
+<tr><td>Signaling</td><td>TCP 443</td><td>Minimal</td></tr>
+</table>
+<p>UDP MUST be allowed — TCP fallback causes quality degradation. Bypass proxy for Teams traffic (*.teams.microsoft.com).</p>
+
+<hr>
+
+<h2>SECTION 4 – MICROSOFT INTUNE / ENDPOINT MANAGER</h2>
+
+<h3>4.1 Device Enrollment</h3>
+<ul>
+<li><strong>Windows Autopilot:</strong> Zero-touch deployment. Requires hardware hash uploaded to Intune.</li>
+<li><strong>Azure AD Join:</strong> Cloud-only identity. Settings > Accounts > Work or School > Join Azure AD.</li>
+<li><strong>Hybrid Azure AD Join:</strong> Device joined to on-prem AD AND Azure AD. Requires Azure AD Connect.</li>
+<li><strong>iOS/Android:</strong> Company Portal app or managed Apple IDs / Android Enterprise.</li>
+</ul>
+
+<h3>4.2 Intune Troubleshooting</h3>
+<pre>
+# Check device compliance
+Get-MgDeviceManagementManagedDevice -Filter "userPrincipalName eq 'user@domain.com'"
+
+# On the device:
+dsregcmd /status   # Check Azure AD join / hybrid join status
+mdmdiagnosticstool.exe -area DeviceEnrollment;DeviceProvisioning;Autopilot -zip C:\temp\intune-diag.zip
+
+# Check Intune management extension log
+C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log
+
+# Sync device
+Invoke-IntuneManagedDeviceSyncDevice
+</pre>
+
+<h3>4.3 Common Intune Issues</h3>
+<ul>
+<li><strong>Policy not applying:</strong> Check assignment groups, conflict resolution, sync status</li>
+<li><strong>App install failing:</strong> Check detection rules, requirements, dependency chain, install logs</li>
+<li><strong>Compliance policy stuck:</strong> Check grace period, device sync, conditional access blocking</li>
+<li><strong>Autopilot ESP timeout:</strong> Check network, required apps, profile assignment, enrollment restrictions</li>
+<li><strong>Win32 app detection:</strong> Use registry key, file/folder existence, or MSI product code</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 5 – ONEDRIVE FOR BUSINESS</h2>
+
+<h3>5.1 OneDrive Troubleshooting</h3>
+<ul>
+<li><strong>Sync pending:</strong> Check OneDrive settings > About for version, reset sync: <code>%localappdata%\Microsoft\OneDrive\onedrive.exe /reset</code></li>
+<li><strong>Known Folder Move (KFM) not working:</strong> Check GPO/Intune policy, verify tenant ID, user not redirected via legacy folder redirection</li>
+<li><strong>Storage full:</strong> Check admin center for storage quota, retention policies holding deleted files</li>
+<li><strong>Files On-Demand issues:</strong> Check NTFS volume, Windows 10 1709+, setting enabled in OneDrive</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 6 – MICROSOFT DEFENDER FOR OFFICE 365</h2>
+
+<h3>6.1 Protection Stack</h3>
+<ol>
+<li>Connection filtering (IP allow/block)</li>
+<li>Anti-malware (EOP)</li>
+<li>Mail flow rules</li>
+<li>Anti-spam (EOP)</li>
+<li>Anti-phishing (Defender for O365)</li>
+<li>Safe Attachments (sandbox detonation)</li>
+<li>Safe Links (URL rewriting/scanning)</li>
+</ol>
+
+<h3>6.2 Common Protection Issues</h3>
+<ul>
+<li><strong>Legitimate email quarantined:</strong> Check quarantine reason, add to allow list / transport rule, submit false positive</li>
+<li><strong>Phish getting through:</strong> Verify Safe Attachments/Links policies, check impersonation protection settings</li>
+<li><strong>Alert fatigue:</strong> Tune alert policies in M365 Defender portal, use automated investigation</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 7 – LICENSING QUICK REFERENCE</h2>
+<table border="1">
+<tr><th>Plan</th><th>Exchange</th><th>SharePoint</th><th>Teams</th><th>Intune</th><th>Defender</th></tr>
+<tr><td>Business Basic</td><td>50GB</td><td>1TB pool</td><td>Yes</td><td>No</td><td>No</td></tr>
+<tr><td>Business Standard</td><td>50GB</td><td>1TB pool</td><td>Yes + desktop apps</td><td>No</td><td>No</td></tr>
+<tr><td>Business Premium</td><td>50GB</td><td>1TB pool</td><td>Yes + desktop apps</td><td>Yes</td><td>Yes (P1)</td></tr>
+<tr><td>E3</td><td>100GB</td><td>1TB+10GB/user</td><td>Yes + desktop apps</td><td>No</td><td>No</td></tr>
+<tr><td>E5</td><td>100GB</td><td>1TB+10GB/user</td><td>Yes + Phone System</td><td>No</td><td>Yes (P2)</td></tr>
+</table>
+
+</body>
+</html>

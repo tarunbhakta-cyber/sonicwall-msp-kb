@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Microsoft L3 Reference – Windows Client Troubleshooting</title>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<h1>Microsoft L3 Support – Windows Client Troubleshooting</h1>
+<p><strong>Scope:</strong> Windows 10/11, Deployment, Drivers, Networking, Performance, Printing, Profiles, BitLocker, Updates</p>
+
+<hr>
+
+<h2>SECTION 1 – BOOT & STARTUP ISSUES</h2>
+
+<h3>1.1 Boot Failure Diagnosis</h3>
+<pre>
+# Access WinRE (Windows Recovery Environment)
+# Hold Shift + Restart, or boot from USB
+
+# Repair boot configuration
+bootrec /fixmbr
+bootrec /fixboot
+bootrec /scanos
+bootrec /rebuildbcd
+
+# UEFI boot repair
+bcdboot C:\Windows /s S: /f UEFI
+
+# Safe Mode via command line (from WinRE)
+bcdedit /set {default} safeboot minimal    # Safe Mode
+bcdedit /set {default} safeboot network    # Safe Mode with Networking
+# Remove after: bcdedit /deletevalue {default} safeboot
+
+# System File Checker
+sfc /scannow
+# If SFC fails:
+DISM /Online /Cleanup-Image /RestoreHealth
+sfc /scannow   # Run again after DISM
+</pre>
+
+<h3>1.2 BSOD Analysis</h3>
+<ul>
+<li>Memory dump location: <code>C:\Windows\Minidump\</code> or <code>C:\Windows\MEMORY.DMP</code></li>
+<li>Analyze with WinDbg: <code>!analyze -v</code></li>
+<li>Common stop codes:</li>
+</ul>
+<table border="1">
+<tr><th>Stop Code</th><th>Common Cause</th><th>Action</th></tr>
+<tr><td>IRQL_NOT_LESS_OR_EQUAL</td><td>Bad driver</td><td>Update/rollback driver, check RAM</td></tr>
+<tr><td>KERNEL_DATA_INPAGE_ERROR</td><td>Disk failure</td><td>Check disk health, run chkdsk</td></tr>
+<tr><td>SYSTEM_SERVICE_EXCEPTION</td><td>Driver/software conflict</td><td>Boot safe mode, uninstall recent software</td></tr>
+<tr><td>CRITICAL_PROCESS_DIED</td><td>Corrupted system files</td><td>SFC /scannow, DISM repair</td></tr>
+<tr><td>WHEA_UNCORRECTABLE_ERROR</td><td>Hardware failure</td><td>Check RAM, CPU thermals, disk health</td></tr>
+<tr><td>PAGE_FAULT_IN_NONPAGED_AREA</td><td>Bad RAM or driver</td><td>Run memtest, update drivers</td></tr>
+</table>
+
+<hr>
+
+<h2>SECTION 2 – NETWORKING</h2>
+
+<h3>2.1 Network Diagnostics</h3>
+<pre>
+# Full network reset
+netsh winsock reset
+netsh int ip reset
+ipconfig /release
+ipconfig /flushdns
+ipconfig /renew
+
+# Check TCP/IP stack
+netsh interface ip show config
+netsh interface show interface
+route print
+
+# WiFi diagnostics
+netsh wlan show interfaces
+netsh wlan show profiles
+netsh wlan show drivers
+# Export WiFi report:
+netsh wlan show wlanreport
+
+# DNS resolution
+nslookup domain.local
+Resolve-DnsName -Name dc01.domain.local -Type A
+
+# Port connectivity test
+Test-NetConnection -ComputerName server.domain.local -Port 443
+tnc 192.168.1.1 -Port 3389
+</pre>
+
+<h3>2.2 VPN Client Troubleshooting</h3>
+<ul>
+<li><strong>Always On VPN:</strong> Check device tunnel vs user tunnel, profile XML, NPS policies, certificate</li>
+<li><strong>Split tunnel vs force tunnel:</strong> Check route table during VPN (<code>route print</code>)</li>
+<li><strong>DNS resolution over VPN:</strong> Check NRPT (Name Resolution Policy Table) rules</li>
+<li><strong>SonicWall NetExtender:</strong> Check TLS version, adapter driver, route injection</li>
+<li><strong>GlobalProtect:</strong> Check HIP (Host Information Profile), portal/gateway config, cert</li>
+</ul>
+
+<h3>2.3 802.1X / Network Authentication</h3>
+<pre>
+# Check 802.1X status
+netsh lan show interfaces    # Wired
+netsh wlan show interfaces   # Wireless
+
+# Event logs for 802.1X
+wevtutil qe "Microsoft-Windows-Wired-AutoConfig/Operational" /c:20 /f:text
+wevtutil qe "Microsoft-Windows-WLAN-AutoConfig/Operational" /c:20 /f:text
+
+# Common issues: certificate expired, NPS policy mismatch, supplicant config wrong
+</pre>
+
+<hr>
+
+<h2>SECTION 3 – PERFORMANCE</h2>
+
+<h3>3.1 Performance Diagnostics</h3>
+<pre>
+# Quick performance check
+Get-Process | Sort CPU -Descending | Select -First 10 Name, CPU, WorkingSet
+Get-Counter '\Processor(_Total)\% Processor Time','\Memory\Available MBytes','\PhysicalDisk(_Total)\% Disk Time' -SampleInterval 2 -MaxSamples 5
+
+# Disk health
+wmic diskdrive get status,model
+Get-PhysicalDisk | Select FriendlyName, MediaType, OperationalStatus, HealthStatus
+
+# Memory diagnostics
+# Run: mdsched.exe (Windows Memory Diagnostic)
+# Or from cmd: bcdedit /bootsequence {memdiag}
+
+# Performance trace (60 seconds)
+perfmon /report   # Generates system diagnostics report
+</pre>
+
+<h3>3.2 Slow PC Methodology</h3>
+<ol>
+<li>Check Task Manager: CPU, Memory, Disk columns. Identify top consumer.</li>
+<li>If Disk 100%: Check for failing drive (<code>wmic diskdrive get status</code>), disable Superfetch/SysMain, check Windows Search indexer</li>
+<li>If High CPU: Check process (antivirus scan, Windows Update, WMI Provider Host)</li>
+<li>If Low Memory: Check commit charge, pagefile size, identify memory leak process</li>
+<li>Check startup items: <code>Task Manager > Startup</code> — disable unnecessary items</li>
+<li>Check malware: Run offline scan with Defender or MSERT</li>
+<li>Check disk space: At least 15% free on C: drive</li>
+<li>Check thermals: Use HWiNFO64 for CPU/GPU temps</li>
+</ol>
+
+<hr>
+
+<h2>SECTION 4 – WINDOWS UPDATE</h2>
+
+<h3>4.1 Update Troubleshooting</h3>
+<pre>
+# Check update history
+Get-WindowsUpdateLog   # Converts ETL to readable log
+wmic qfe list brief /format:table
+
+# Reset Windows Update components
+net stop wuauserv
+net stop cryptsvc
+net stop bits
+net stop msiserver
+ren C:\Windows\SoftwareDistribution SoftwareDistribution.old
+ren C:\Windows\System32\catroot2 catroot2.old
+net start wuauserv
+net start cryptsvc
+net start bits
+net start msiserver
+
+# Manual update installation
+# Download from Microsoft Update Catalog: https://www.catalog.update.microsoft.com
+wusa.exe "C:\Updates\KB5034441.msu" /quiet /norestart
+
+# Feature update troubleshooting
+# Check: C:\$WINDOWS.~BT\Sources\Panther\setupact.log
+# Check: C:\Windows\Panther\setupact.log
+</pre>
+
+<h3>4.2 Common Update Errors</h3>
+<table border="1">
+<tr><th>Error</th><th>Cause</th><th>Fix</th></tr>
+<tr><td>0x80070002</td><td>Missing files</td><td>Reset update components, SFC</td></tr>
+<tr><td>0x800f0922</td><td>Insufficient partition space</td><td>Expand recovery partition or EFI</td></tr>
+<tr><td>0x80073712</td><td>Corrupted CBS</td><td>DISM RestoreHealth, SFC</td></tr>
+<tr><td>0x8024402c</td><td>Connection failure</td><td>Check proxy, WSUS URL, network</td></tr>
+<tr><td>0x80240034</td><td>Download failed</td><td>Clear SoftwareDistribution, retry</td></tr>
+</table>
+
+<hr>
+
+<h2>SECTION 5 – USER PROFILES</h2>
+
+<h3>5.1 Profile Troubleshooting</h3>
+<pre>
+# Check profile list
+Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\*" |
+    Select PSChildName, ProfileImagePath, State
+
+# Profile states:
+# 0 = Profile ready
+# 1 = Profile being created
+# 2 = Profile being deleted
+
+# Fix "temporary profile" issue:
+# 1. Backup user data from C:\Users\username
+# 2. Delete profile SID entry from ProfileList registry key
+# 3. Delete C:\Users\username folder
+# 4. Reboot and log in (fresh profile created)
+
+# Roaming profile issues
+# Check: \\server\profiles$\username.V6 (Win 10/11)
+# Verify permissions: User = Full Control on their folder
+# Check GPO: Computer Config > Admin Templates > System > User Profiles
+</pre>
+
+<h3>5.2 Folder Redirection Troubleshooting</h3>
+<ul>
+<li>Check GPO: User Config > Policies > Windows Settings > Folder Redirection</li>
+<li>Verify target path accessible and permissions correct</li>
+<li>Check: <code>gpresult /R</code> for applied folder redirection GPO</li>
+<li>Offline files sync issues: Check CSC cache, reset if needed: <code>CSCCmd.exe /enum</code></li>
+</ul>
+
+<hr>
+
+<h2>SECTION 6 – PRINTING</h2>
+
+<h3>6.1 Print Troubleshooting</h3>
+<pre>
+# Clear print queue
+Stop-Service Spooler
+Remove-Item C:\Windows\System32\spool\PRINTERS\* -Force
+Start-Service Spooler
+
+# Check printer status
+Get-Printer | Select Name, PortName, DriverName, PrinterStatus
+Get-PrintJob -PrinterName "HP LaserJet"
+
+# Reinstall printer driver
+Remove-PrinterDriver -Name "HP Universal Printing PCL 6"
+Add-PrinterDriver -Name "HP Universal Printing PCL 6"
+
+# Print Management snap-in
+printmanagement.msc
+</pre>
+
+<h3>6.2 Common Print Issues</h3>
+<ul>
+<li><strong>Print spooler crashing:</strong> Bad driver — isolate driver in separate process, update/replace driver</li>
+<li><strong>Slow printing:</strong> Check spooling setting (print directly vs spool), driver type (PCL vs PS), network path</li>
+<li><strong>Printer offline:</strong> Check port config, SNMP status, WSD vs TCP/IP port</li>
+<li><strong>Point and Print not working:</strong> Check GPO restrictions (PrintNightmare patches), Package Point and Print</li>
+</ul>
+
+<hr>
+
+<h2>SECTION 7 – BITLOCKER</h2>
+
+<h3>7.1 BitLocker Management</h3>
+<pre>
+# Check BitLocker status
+manage-bde -status
+Get-BitLockerVolume
+
+# Enable BitLocker
+Enable-BitLocker -MountPoint "C:" -EncryptionMethod XtsAes256 -RecoveryPasswordProtector
+
+# Get recovery key
+manage-bde -protectors -get C:
+(Get-BitLockerVolume -MountPoint "C:").KeyProtector | Where KeyProtectorType -eq "RecoveryPassword"
+
+# Backup recovery key to AD
+Backup-BitLockerKeyProtector -MountPoint "C:" -KeyProtectorId "{GUID}"
+
+# Suspend BitLocker (for BIOS updates)
+Suspend-BitLocker -MountPoint "C:" -RebootCount 1
+
+# Unlock with recovery key
+manage-bde -unlock C: -RecoveryPassword 123456-789012-345678-901234-567890-123456-789012-345678
+</pre>
+
+<h3>7.2 Common BitLocker Issues</h3>
+<ul>
+<li><strong>Recovery key prompt on every boot:</strong> Check TPM health (<code>tpm.msc</code>), re-seal BitLocker, check Secure Boot</li>
+<li><strong>Can't enable:</strong> Check TPM 2.0 present and enabled, UEFI boot, GPT partition, Secure Boot</li>
+<li><strong>Recovery key not in AD:</strong> Manually backup: <code>manage-bde -protectors -adbackup C: -ID {GUID}</code></li>
+<li><strong>Intune BitLocker policy:</strong> Check device compliance, encryption profile, silent enablement requirements</li>
+</ul>
+
+</body>
+</html>
